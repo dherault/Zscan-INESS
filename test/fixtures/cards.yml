@@ -1,0 +1,11 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/Fixtures.html
+
+one:
+  scannable_id: 1
+  scannable_type: MyString
+  uid: MyString
+
+two:
+  scannable_id: 1
+  scannable_type: MyString
+  uid: MyString

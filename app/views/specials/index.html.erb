@@ -1,0 +1,36 @@
+<div class="container">
+<p>Charger le js dynamiquement en fonction de l'HABTM :shops --> Problem du namespace dans le viewmodel</p>
+<h1>Actions spéciales</h1>
+<%= link_to 'Nouvelle action', new_special_path %>
+<br><br>
+<table class='table table-hover'>
+  <thead>
+    <tr>
+      <th>Nom</th>
+      <th>Description</th>
+      <th>Fonction appelée</th>
+      <th>Cartes</th>
+      <th>Pian'ss</th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <% @specials.each do |special| %>
+      <tr>
+        <td><%= special.name %></td>
+        <td><%= special.description %></td>
+        <td><%= special.function %></td>
+        <td><%= special.cards.length %></td>
+        <td><%= link_to special.shops.length, view_shops_for_special_path(special) %></td>
+        <td><%= link_to 'Modifier', edit_special_path(special) %></td>
+        <td><%= link_to 'Supprimer', special, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<br>
+
+</div>

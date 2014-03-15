@@ -1,0 +1,32 @@
+<div class="container">
+
+<h1>Listing cards</h1>
+
+<table class="table table-hover">
+  <thead>
+    <tr>
+      <th>Uid</th>
+      <th>Scannable</th>
+      <th></th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <% @cards.each do |card| %>
+      <tr>
+        <td><%= card.uid %></td>
+        <td><%= card.scannable.name %></td>
+        <td><%= link_to 'Show', card %></td>
+        <td><%= link_to 'Edit', edit_card_path(card) %></td>
+        <td><%= link_to 'Destroy', card, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<br>
+
+<%= link_to 'New Card', new_card_path %>
+</div>

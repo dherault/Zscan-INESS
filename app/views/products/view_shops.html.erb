@@ -1,0 +1,137 @@
+<div class="container">
+    
+    <h1>
+        Points de vente proposants <%= @product.name %>
+        <br><small><%= @product.description %></small>
+    </h1><br>
+    <div class="row">
+        <div class="col-md-2"></div>
+        <div class="col-md-4">
+            <h3>Le proposent <small data-bind='text: shopsProduct().length'></small></h3>
+
+            <table data-bind='visible: shopsProduct().length > 0' class="table table-condensed">
+                <tbody data-bind='foreach: shopsProduct'>
+                    <tr>
+                        <td width="90%">
+                            <span data-bind='text: name'></span>
+                            <div data-bind="attr: { id: id }" class='pull-right'>
+                                <%= image_tag("preloader.gif", :width => 60) %>
+                            </div>
+                        </td>
+                        <td>
+                            <a href="#" data-bind="click: $root.removeShop" class="glyphicon glyphicon-arrow-right"></a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+        </div>
+    
+        <div class='col-md-4'>
+
+            <h3>Ne le proposent pas <small data-bind='text: shopsTous().length'></small></h3>
+            <table data-bind='visible: shopsTous().length > 0' class="table table-condensed">
+                <tbody data-bind='foreach: shopsTous'>
+                    <tr>
+                        <td width="90%">
+                            <span data-bind='text: name'></span>
+                            <div data-bind='attr: { id: id }' class='pull-right'>
+                                <%= image_tag("preloader.gif", :width => 60) %>
+                            </div>
+                        </td>
+                        <td>
+                            <a href='#' data-bind='click: $root.addShop' class="glyphicon glyphicon-arrow-left"></a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+        </div>
+    </div>
+</div>
+
+
+</div>
+
+<script>
+
+function addReservation(id, name) {
+    var self  = this;
+    self.id   = id;
+    self.name = name;
+};
+
+function ReservationsViewModel() {
+    var self = this;
+
+
+    self.shopsProduct = ko.observableArray([ <% @product.shops.each do |shop | %> <%= raw 'new addReservation(' + shop.id.to_s + ',"' + shop.name + '"),' %> <% end %>
+    //new addReservation(id, name, price),
+    ]);
+
+    self.shopsTous = ko.observableArray([ <% @shops.each do |unshop | %> <%= raw 'new addReservation(' + unshop.id.to_s + ',"' + unshop.name + '"),' %> <% end %>
+    //new addReservation(id, name, price),
+    ]);
+
+
+    self.Doublons = function() {
+
+        for (var i = 0; i < self.shopsProduct().length; i++) {
+            for (var j = 0; j < self.shopsTous().length; j++) {
+                if (self.shopsProduct()[i].name == self.shopsTous()[j].name) {
+                    self.shopsTous.remove(self.shopsTous()[j]);
+                    break;
+                };
+            };
+        };
+    };
+    self.Doublons();
+
+    self.addShop = function(shopsTous) {
+
+        $('#' + shopsTous.id).show();
+        self.shopsTous.remove(shopsTous);
+        self.shopsProduct.push(new addReservation(shopsTous.id, shopsTous.name, shopsTous.price));
+
+        $.post('<%= view_shops_for_product_path(@product) + "/add/" %>' + shopsTous.id, {}, function(allData) {
+            if (allData.status == "success") {
+                $('#' + shopsTous.id).hide();
+            } else {
+                self.shopsProduct.remove(shopsTous);
+                self.shopsTous.push(new addReservation(shopsTous.id, shopsTous.name, shopsTous.price));
+            };
+
+        }).error(function() {
+            alert('erreur lors du post AJAX! Recharge la page avant de continuer.');
+        });
+    };
+
+    self.removeShop = function(shopsProduct) {
+
+        $('#' + shopsProduct.id).show();
+        self.shopsProduct.remove(shopsProduct);
+        self.shopsTous.push(new addReservation(shopsProduct.id, shopsProduct.name, shopsProduct.price));
+
+        $.post('<%= view_shops_for_product_path(@product) + "/remove/" %>' + shopsProduct.id, {}, function(allData) {
+
+            if (allData.status == "success") {
+                $('#' + shopsProduct.id).hide();
+            } else {
+                self.shopsProduct.push(new addReservation(shopsProduct.id, shopsProduct.name, shopsProduct.price));
+            };
+
+        }).error(function() {
+            alert('erreur lors du post AJAX! Recharge la page avant de continuer.');
+        });
+    };
+
+};
+
+ko.applyBindings(new ReservationsViewModel());
+
+<% @shops.each do |unshop| %>
+<%= raw "$('#" + unshop.id.to_s + "').hide();" %>
+<% end %>
+
+</script>
+

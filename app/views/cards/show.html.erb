@@ -1,0 +1,19 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <strong>Scannable:</strong>
+  <%= @card.scannable_id %>
+</p>
+
+<p>
+  <strong>Scannable type:</strong>
+  <%= @card.scannable_type %>
+</p>
+
+<p>
+  <strong>Uid:</strong>
+  <%= @card.uid %>
+</p>
+
+<%= link_to 'Edit', edit_card_path(@card) %> |
+<%= link_to 'Back', cards_path %>

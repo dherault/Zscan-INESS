@@ -1,0 +1,33 @@
+<div class="container">
+  
+<h1>Clients du Gala</h1>
+<%= link_to 'New User', new_user_path %>
+Si création d'un user hors assignation de carte alors erreur 500 -> vider le usercontroller et les routes
+<br><br>
+<table class='table table-hover'>
+  <thead>
+    <tr>
+      <th>UID de la carte</th>
+      <th>Crédit</th>
+      <th></th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <% @users.each do |user| %>
+      <tr>
+        <td><%= user.card.uid %></td>
+        <td><%= user.amount %></td>
+        <td><%= link_to 'Infos', user %></td>
+        <td><%= link_to 'Modifier', edit_user_path(user) %></td>
+        <td><%= link_to 'Supprimer', user, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<br>
+
+</div>

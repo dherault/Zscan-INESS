@@ -1,0 +1,97 @@
+<div class="container">
+	<h1>Statistiques de l'événement</h1>
+	<div class="row">
+		<div class="col-md-6">
+			<h3>Caisse</h3>
+			<table class="table">
+			  	<tbody>
+					<tr>
+						<td>Nombre d'encaissements</td>
+						<td><%= @orders_checkout.length %></td>
+					</tr>
+					<tr>
+						<td>Montant encaissé</td>
+						<td><%= (100 * @total_checkout).to_i / 100.00 %>€</td>
+					</tr>
+					<tr>
+						<td>Encaissement moyen</td>
+						<td><%= (100 * @total_checkout / @orders_checkout.length).to_i / 100.00 %>€</td>
+					</tr>
+					<tr>
+						<td>Premier encaissement</td>
+						<td><%= @orders_checkout.first.created_at.strftime("le %d/%m à %H:%M") %></td>
+					</tr>
+					<tr>
+						<td>Dernier encaissement</td>
+						<td><%= @orders_checkout.last.created_at.strftime("le %d/%m à %H:%M") %></td>
+					</tr>
+			  	</tbody>
+			</table>
+		</div>
+		<div class="col-md-6">
+			<h3>Bar</h3>
+			<table class="table">
+				<tbody>
+					<tr>
+						<td>Nombre de commandes</td>
+						<td><%= @orders_saloon.length %></td>
+					</tr>
+					<tr>
+						<td>Montant dépensé</td>
+						<td><%= (100 * @total_saloon).to_i / 100.00 %>€</td>
+					</tr>
+					<tr>
+						<td>Dépense moyenne</td>
+						<td><%= (100 * @total_saloon / @orders_saloon.length).to_i / 100.00 %>€</td>
+					</tr>
+					<tr>
+						<td>Premiere commande</td>
+						<td><%= @orders_saloon.first.created_at.strftime("le %d/%m à %H:%M") %></td>
+					</tr>
+					<tr>
+						<td>Derniere commande</td>
+						<td><%= @orders_saloon.last.created_at.strftime("le %d/%m à %H:%M") %></td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+	</div>
+	<h3>Clients:</h3>
+	<table class="table">
+		<tbody>
+			<tr>
+				<td>Cartes rechargées</td>
+				<td><%= @users.length %></td>
+			</tr>
+			<tr>
+				<td>Passages en caisse par client</td>
+				<td><%= (100 * @orders_checkout.length / @users.length).to_i / 100.00 %></td>
+			</tr>
+			<tr>
+				<td>Passages au bar par client</td>
+				<td><%= (100 * @orders_saloon.length / @users.length).to_i / 100.00 %></td>
+			</tr>
+			<tr>
+				<td>Cartes vidées par leur proprietaire</td>
+				<td><%= @users.length - @non_empty_cards %> (<%=  (10000 * (@users.length - @non_empty_cards) / @users.length).to_i / 100.00 %>%)</td>
+			</tr>
+			<tr>
+				<td>Cartes non vidées par leur proprietaire</td>
+				<td><%= @non_empty_cards %> (<%=  (10000 * @non_empty_cards / @users.length).to_i / 100.00 %>%)</td>
+			</tr>
+			<tr>
+				<td>Crédit non dépensé par la clientelle</td>
+				<td><%= @total_checkout - @total_saloon %>€</td>
+			</tr>
+			<tr>
+				<td>Montant moyen restant sur les cartes</td>
+				<td><%= (100 * (@total_checkout - @total_saloon) / @users.length).to_i / 100.00 %>€</td>
+			</tr>
+			<tr>
+				<td>Montant moyen restant sur les cartes non vidées</td>
+				<td><%= (100 * (@total_checkout - @total_saloon) / @non_empty_cards).to_i / 100.00 %>€</td>
+			</tr>
+		</tbody>
+	</table>
+	
+</div>

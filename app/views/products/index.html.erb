@@ -1,0 +1,47 @@
+<div class="container">
+  
+<p>Refaire les validation pour interdire les ' et "</p>
+<h1>Produits du Gala</h1>
+<%= link_to 'Nouveau produit', new_product_path %>
+<br><br>
+<table class='table table-hover'>
+  <thead>
+    <tr>
+      <th>Nom</th>
+      <th>Description</th>
+      <th>Prix</th>
+      <th>Appro</th> 
+      <th>Cartes</th>
+      <th>Pian'ss</th>
+      <th></th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <% @products.each do |product| %>
+      <tr>
+        <td><%= product.name %></td>
+        <td><%= product.description %></td>
+        <td><%= product.price %></td>
+        <td>
+          <%= if product.parent
+                product.parent.name + " (" + product.parent_qty.to_s + "%)"
+              else
+                nil 
+              end %>
+        </td>
+        <td><%= product.cards.length %></td>
+        <td><%= link_to product.shops.length, view_shops_for_product_path(product) %></td>
+        <td><%= link_to 'Stats', product %></td>
+        <td><%= link_to 'Modifier', edit_product_path(product) %></td>
+        <td><%= link_to 'Detruire', product, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<br>
+
+</div>

@@ -1,0 +1,400 @@
+<!-- Pians -->
+<div id="sortable" class="sortable">
+  <% @shops.each do |shop| %>
+    <div id="<%= shop.id %>" class="dragable">
+      <div class="shop-name text-center grey" id="<%= shop.name %>">
+          <%= shop.name %>
+      </div>
+      <div class="stocks-list">
+        <% shop.products.each do |product| %>
+          <% if !product.parent %>
+            <div class="stock-product">
+              <span class="default-cursor">
+                <%=product.name %>
+              </span>
+              <span id="<%= shop.id.to_s + '-' + product.id.to_s %>" class="product-qty red" onclick='setStock(<%= shop.id.to_s %>,"<%= shop.name %>",<%= product.id.to_s %>,"<%= product.name %>")'>0</span>
+            </div>
+          <% else
+            check = [true, true]
+            shop.products.each do |product2|
+              if product2.id == product.id || product2.id == product.parent.id
+                check[0] = false
+              end
+              if product2.parent == product.parent && product2.id != product.id && check[0] == false
+                check[1] = false
+              end
+            end
+            if check[1] == true %>
+              <div class="stock-product">
+                <span class="default-cursor">
+                  <%=product.parent.name %>
+                </span>
+                <span id="<%= shop.id.to_s + '-' + product.parent.id.to_s %>" class="product-qty red" onclick='setStock(<%= shop.id.to_s %>,"<%= shop.name %>",<%= product.parent.id.to_s %>,"<%= product.parent.name %>")'>0</span>
+              </div>
+            <% end %>
+
+          <% end %>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+  <id class="dragable-console">
+    <div class="shop-name text-center gray" id="console">
+      Console
+    </div>
+    <div class="console-timer">
+      <span id="console-time">0</span>
+      -
+      <span id="console-timer">0</span>
+    </div>
+    <div class="console-hit">
+      Hits : 
+      <span id="console-hit">0</span>
+      Order : 
+      <span id="console-order">0</span>
+    </div>
+    <div class="console-hit-stats">
+      Hits/min : 
+      <span id="console-hit-stats">0</span>
+      Order/min : 
+      <span id="console-order-stats">0</span>
+    </div>
+    <div class="lead">Courage Manon !</div>
+  </id>
+</div>
+<!-- End of Pians -->
+<div class="clearfix"></div>
+<div class="container">
+
+</div>
+<br><br>
+<div class="row">
+    <!-- Chat -->
+    <div class="col-md-6 chat-box">
+      <form class="form-inline" role="form" id="chatform">
+        <div class="form-group">
+          <input type="text" class="form-control chat-control" id="message" placeholder="Call it, friendo">
+        </div>
+        <button type="submit" class="btn btn-default">Send</button>
+      </form>
+      <br>
+      <br>
+      <div id="chat" class="chat-console"></div>
+    </div>
+    <!-- End of Chat -->
+    <!-- Options -->
+    <div class="col-md-6">
+      <div class="watch-box">
+      <div class="watch-text">
+      </div>
+      </div>
+      <%= link_to 'stocks', stocks_path %>
+      <span class="btn btn-primary" onclick="sendTest()">Test</span>
+    <!-- End of Options -->
+    </div>
+</div>
+
+     
+<!-- Modal -->
+<div id="modalStock" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="modalStockHead">Blabla</h3>
+      </div>
+       <div class="modal-body">
+        <br>
+        <p class="lead text-center" id="modalStockContent">Blabla</p>
+        <br>
+        <p class="text-center">
+          <input id="modalStockInput" class="form-control text-center" type="text" autocomplete="off"/>
+        </p>
+        <br>
+      </div>
+      <div class="modal-footer">
+        <button id="modalStockBtn" class="btn btn-info btn-large" onclick="newStock()">Approvisionner</button>
+    <button class="btn btn-danger btn-large" data-dismiss="modal" aria-hidden="true">Annuler</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+<!-- End of Modal -->
+
+
+<script>
+
+//var pusher = new Pusher(''); // uses your API KEY
+//var chat = pusher.subscribe('chat_channel');
+//var stock = pusher.subscribe('stock_channel');
+
+// chat.bind('public_message', function(data) {
+//   $('<p></p>').html(data.shop + " - " + data.msg).appendTo('#console');
+// });
+// stock.bind('stock', function(data) {
+//   $('<p></p>').html(data.shop + " - " + data.products).appendTo('#console');
+//   products = $.parseJSON(data.products);
+//   for (var i = 0; i < products.length; i++) {
+//     addStock(data.shop_id, products[i].id, -parseInt(products[i].qty));
+//   };
+// });
+// stock.bind('annulation', function(data) {
+//   $('<p></p>').html("ANNULATION - " + data.shop + " - " + data.products).appendTo('#console');
+//   products = $.parseJSON(data.products);
+//   for (var i = 0; i < products.length; i++) {
+//     addStock(data.shop_id, products[i].id, parseInt(products[i].qty));
+//   };
+// });
+var dad = {
+  <% @products.each do |pro|
+    if pro.parent %>
+      <%= pro.id %>: <%= pro.parent.id %>,
+    <% else %>
+      <%= pro.id.to_s + ": "+pro.id.to_s+"," %>
+    <%end 
+  end %>
+};
+var mom = {
+  <% @products.each do |pro|
+    if pro.parent %>
+      <%= pro.id %>: <%= (pro.parent_qty * 100).to_i/10000.00  %>,
+    <% else %>
+      <%= pro.id.to_s + ":1," %>
+    <%end 
+  end %>
+};
+
+function prependChat (user, channel, type, msg) {
+  // body...
+  var d = new Date;  
+  $("#chat").prepend("<p><span class='chat-log'>"+d.getHours()+":"+d.getMinutes()+" <span class='chat-user'>"+user+"</span>@"+channel+" : </span><span class='chat-"+type+"'>"+msg+"</span><p/>");
+}
+
+socket = new WebSocket("ws://"+window.location.host+"/handlews/stock/<%= session[:shop_name] %>");
+
+socket.onopen = function(){
+  socket.send("<%= session[:shop_name] %> vient de se connecter sur le canal stock@active");
+  socket.send("scan_start@query");
+}  
+socket.onmessage = function(msg){  
+  console.log(msg.data);
+  var res = msg.data.split("@");
+  if(!$('#'+res[1]).hasClass("primary")){
+    $('#'+res[1]).addClass("primary");
+  }
+  $('#console-hit').html(parseInt($('#console-hit').html())+1);
+  var d = new Date;
+  good:
+  switch(res[3])
+  {
+  case "chat":
+    prependChat(res[1],res[0],res[3],res[2]);
+    break;
+  case "info":
+      prependChat(res[1],res[0],res[3],res[2]);
+      alert(res[1]+" : "+res[2]);
+    break;
+  case "active":
+      prependChat(res[1],res[0],res[3],res[2]);
+    break;
+  case "query":
+    evil:
+    switch(res[2])
+    {
+      case "scan_start":
+        socket.send("scan_back@query");
+        break evil;
+    }
+    break;
+  case "stock":
+    var ult = res[2].split(",");
+      console.log(ult);
+    for (var i = 1; i < ult.length; i++) {
+      console.log(ult[i]+" -> "+dad[ult[i]]+" x"+mom[ult[i]]);
+      addStock(ult[0], dad[ult[i]], -mom[ult[i]]);
+    };
+    $('#console-order').html(parseInt($('#console-order').html())+1);
+    $(".watch-text").prepend(res[2]+'-');
+    if ($(".watch-text").html().length>814) {
+      $(".watch-text").html($(".watch-text").html().substring(0,814));
+    };
+    break;
+  }
+}  
+// socket.onclose = function(){  
+//   socket.send("<%= session[:shop_name] %> s'est déconnecté@inactive");
+// }
+
+function sendMessage () {
+  socket.send($("#message").val()+"@chat");  
+  $("#message").val("");
+}
+
+function refreshList () {
+  console.log("Debut du scan")
+  $(".glyphicon-refresh").addClass("rotate-icon");
+  $(".shop-name").removeClass("primary"); //LA CA MARCHE PAS !!!
+    socket.send("scan_start@query");
+  $(".glyphicon-refresh").addClass("rotate-icon");
+    setTimeout(function(){
+    $(".glyphicon-refresh").removeClass("rotate-icon");
+      }, 1000);
+}
+
+var tid = setInterval(refreshList, 1000*5);
+
+$( "#chatform" ).submit(function( event ) {
+  sendMessage()
+  event.preventDefault();
+});
+//$('#console').hide();
+$("#sortable").sortable({
+  placeholder: "dragplaceholder", containment : "parent", revert: true,  handle: "div.shop-name"
+});
+$("#sortable").disableSelection();
+
+$("#toggle-description").click(function() {
+
+  if ($("#toggle-description").hasClass("toggle-off")) {
+    <% @shops.each do |shop| %>
+      $('#description<%= shop.id %>').hide();
+    <% end %>
+  } else {
+    <% @shops.each do |shop| %>
+      $('#description<%= shop.id %>').show();
+    <% end %>
+  };
+
+});
+
+function addStock (shop, product, qty) {
+  var id = "#" + shop.toString() + '-' + product.toString();
+  var total = parseFloat($(id).text()) + parseFloat(qty);;
+  total = Math.round(total*1000)/1000.00
+  $(id).html(total);
+  if (total > 10) {
+    if($(id).hasClass('red')) {
+      $(id).removeClass('red');
+    };
+    if($(id).hasClass('orange')) {
+      $(id).removeClass('orange');
+    };
+    if(!$(id).hasClass('green')) {
+      $(id).addClass('green');
+    };
+  } else if (total <= 10 && total > 5) {
+    if($(id).hasClass('green')) {
+      $(id).removeClass('green');
+    };
+    if($(id).hasClass('red')) {
+      $(id).removeClass('red');
+    };
+    if(!$(id).hasClass('orange')) {
+      $(id).addClass('orange');
+    };
+  } else {
+    if($(id).hasClass('green')) {
+      $(id).removeClass('green');
+    };
+    if($(id).hasClass('orange')) {
+      $(id).removeClass('orange');
+    };
+    if(!$(id).hasClass('red')) {
+      $(id).addClass('red');
+    };
+  };
+};
+
+function newStock (shop, product) {
+  var qty = $('#modalStockInput').val();
+  if (isNaN(qty)) {
+    alert("La valeur entrée n'est pas un nombre !");
+    $('#modalStockInput').val('');
+    $('#modalStockInput').focus();
+  } else {
+    qty = parseInt(qty);
+    var jsonData = {
+                    'shop_id': shop,
+                    'product_id': product,
+                    'qty': qty
+                  };
+    $.post("<%= url_for add_stock_path %>", jsonData, function(data) {
+      if (data.status == "success") {
+        addStock(shop,product,qty);
+      } else {
+        alert('Erreur lors de l\'envoie de l\'stock. Si le problème persiste recharge la page.');
+      };
+    }).error(function() {
+        alert('erreur lors du post AJAX! Recharge la page (F5) avant de continuer.')
+    });
+    $('#modalStock').modal('hide');
+  };
+};
+
+function setStock (shop_id, shop, product_id, product) {
+  $('#modalStockInput').val('');
+  $('#modalStockHead').html('Approvisionner ' + shop);
+  $('#modalStockContent').html('Combien de <span class="leadmodal">' + product + '</span> ?');
+  $('#modalStockBtn').attr('onclick', 'newStock('+shop_id+','+product_id+')');
+  $('#modalStock').modal('show');
+  $('#modalStockInput').focus();
+};
+
+$('#modalStock').on('shown.bs.modal', function () {
+  $('#modalStockInput').focus();
+});
+
+$("#modalStockInput").keyup(function (e) {
+    if (e.keyCode == 13) {
+        $('#modalStockBtn').click();
+    }
+});
+
+<% @stocks.each do |stock| %>
+  <%= raw "addStock("+stock.shop_id.to_s+","+stock.product_id.to_s+","+stock.qty.to_s+");" %>
+<% end %>
+
+<% @shops.each do |shop|
+  shop.orders.each do |order|
+    order.products.each do |product|
+      if product.parent %>
+        <%= raw "addStock("+order.shop.id.to_s+","+product.parent.id.to_s+",-"+((product.parent_qty*100).to_i/10000.00).to_s+");" %>
+      <% else %>
+        <%= raw "addStock("+order.shop.id.to_s+","+product.id.to_s+", -1 );" %>
+      <% end
+    end
+  end
+end %>
+
+function refreshTimer () {
+  // body...
+  var d = new Date();
+  ice = new Date(d-fire);
+  $('#console-time').html(d.getHours()+"h"+d.getMinutes());
+  $('#console-timer').html(parseInt(ice.getHours())-1+"h"+ice.getMinutes()+"m"+ice.getSeconds()+"s");
+}
+  
+function refreshHitStats () {
+  var d = new Date();
+  ice = new Date(d-fire);
+    $('#console-hit-stats').html(Math.round(parseInt($('#console-hit').html())/(ice.getTime()/1000/60)));
+    $('#console-order-stats').html(Math.round(parseInt($('#console-order').html())/(ice.getTime()/1000/60)));
+  // body...
+}
+var fire = new Date();
+var tie = setInterval(refreshHitStats, 1000*1);
+var agood = setInterval(refreshTimer, 1000*1);
+
+
+function sendTest () {
+  var xsx = Math.random();
+  if (xsx>0.5) {
+  socket.send("10,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3@stock");
+  } else{
+  socket.send("9,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2@stock");
+    
+  }
+  ;
+}
+
+</script>

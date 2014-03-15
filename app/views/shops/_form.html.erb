@@ -1,0 +1,37 @@
+<%= form_for(@shop) do |f| %>
+  <% if @shop.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(@shop.errors.count, "error") %> prohibited this shop from being saved:</h2>
+
+      <ul>
+      <% @shop.errors.full_messages.each do |msg| %>
+        <li><%= msg %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= f.label :name %><br>
+    <%= f.text_field :name %>
+  </div>
+  <div class="field">
+    <%= f.label :description %><br>
+    <%= f.text_field :description %>
+  </div>
+  <div class="field">
+    <%= f.label :level %><br>
+    <%= f.number_field :level %>
+  </div>
+  <div class="field">
+      <label>Choisis ton mot de passe</label>
+      <%= f.password_field :password %>
+    </div>
+    <div class="field">
+      <label>Entre-le encore</label>
+      <%= f.password_field :password_confirmation %>
+    </div>
+  <div class="actions">
+    <%= f.submit %>
+  </div>
+<% end %>

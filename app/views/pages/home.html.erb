@@ -1,0 +1,179 @@
+<div class="container">
+	
+	<h1 class="text-center">INovative Event SyStem</h1>
+	<% if false %>
+	<div class="alert alert-info">
+	<p>Passer sur un webserver multitreads (unicorn?)</p>
+	<p>Algo : bloquer un pians a distance</p><br>
+		<ul>
+			<li>Apprendre rspec</li>
+			<li>Passer en rails 4 et mettre a niveau la syntax</li>
+			<li>Renommer les variables et les fonctions, refactor</li>
+			<li>Deployer avant de developper</li>
+			<li>Developper l'eventmachine avant le reste</li>
+			<li>Mettre a niveau les mode bar et caisse pour le rfid</li>
+			<li>Developper les modules K've</li>
+			<li>Revoir le graphisme en plus prestige</li>
+			<li>Deplacer et minifier le js </li>
+			<li>Parcourir toutes les fonctions</li>
+			<li>Creer un tuto</li>
+		</ul><br><br>
+		Algo : <br><br>
+		1 - Gerer le pb des appros en considérant qu'une bouteille se vide au bout de n verres<br>
+		---- Economique<br>
+		---- Equitable<br>
+		---- Non ambigue<br>
+		5 - Faire un TdB pour les grip'ss<br>
+		6 - Faire le versement d'une carte dans l'autre <br>
+		6 - Faire les offres pg <br>
+		7 - Revoir les restrictions et le login (carte?)<br>
+		8 - Refaire la page d'acceuil<br>
+		cartes : Une carte recharger la page et une autre pour appeller de l'aide, une pour signaler le manque dun produit (+carte produit).
+		<br><br>
+		<u>A faire (difficulté) :</u><br>
+                <ul>
+                    <li class="raye">la creation de l'app (3)</li>
+                    <li class="raye">la creation du rep github (3)</li>
+                    <li class="raye">le deploiement Heroku (5)</li>
+                    <li class="raye">la generation des models (3)</li>
+                    <li class="raye">le templating (4)</li>
+                    <li class="raye">les products (6)</li>
+                    <li class="raye">les pgpeks (6)</li>
+                    <li class="raye">les pians (6)</li>
+                    <li class="raye">les consos (8)</li>
+                    <li class="raye">les HABTM + view (10)</li>
+                    <li class="raye">le bar (10)</li>
+                    <li class="raye">la caisse (10)</li>
+                    <li class="raye">l'historique (7)</li>
+                    <li class="raye">la page d'accueil (3)</li>
+                    <li class="raye">les notices (2)</li>
+                    <li class="raye">l'authentification (7)</li>
+                    <li class="raye">la generation multiple (8)</li>
+                    <li class="raye">la suppression multiple (3)</li>
+                    <li class="raye">les annulations (3)</li>
+                    <p><br>main :</p>
+                    <li>les appros (10)</li>
+                    <li>le tdb grips (10)</li>
+                    <li>les stats(10)</li>
+                    <li>le chat (10)</li>
+                    <li>les offres PG</li>
+                    <li>les remboursements</li>
+                    <li>bug heure des created_at</li>
+                    <li>la carte des products / impressions (10)</li>
+                    <p><br>else :</p>
+                    <li>les restrictions</li>
+                    <li>les niveaux de recursivité</li>
+                    <li>status supprimee pour les consos</li>
+                    <li>les tests de l'app</li>
+                    <li>le monitoring</li>
+                    <li>le sorting des tables</li>
+                    <li>créer un product contenant "'" et tout debuger</li>
+                    <li>verifier le js</li>
+                    <li>les paginations</li>
+                    <li>payer une vrai database</li>
+                    <li>la page de gestion</li>
+                    <li>les routes + actions inutiles</li>
+                    <li>les commentaires (10)</li>
+                    <li>creer un Git Zt PHP et deplacer l'application</li>
+                    <li>creer un tuto pour la Ztce PHP</li>
+                </ul>
+	</div>
+
+	<div class="row">
+		<div class="col-md-6">
+			<h3>Client</h3>
+			<p>
+				HTML5 et CSS3<br>
+				<small class="muted">Javascript :</small> jQuery et KnockOut<br>
+				<small class="muted">Front end framework :</small> Flat-ui modifié
+			</p>
+		</div>
+		<div class="col-md-6">
+			<h3>Serveur</h3>
+			<p>
+				Codé en Ruby, monté sur Rails<br>
+				<small class="muted">Hébergement :</small> Heroku<br>
+				<small class="muted">Webserver :</small> Unicorn<br>
+				<small class="muted">Base de Donnée :</small> PostgreSQL<br>
+				<small class="muted">Repository :</small> GitHub
+			</p>
+		</div>
+	</div>
+	<br>
+
+	
+
+
+	<div>
+	<ul>
+		<u>Commandes utiles :</u><br><br>
+		<li><b>$ rails s</b> <small class="muted">démarre le serveur rails</small></li>
+		<li><b>$ rake db:migrate</b> <small class="muted">met a jour les tables de la bdd</small></li>
+		<li><b>$ git add .</b> <small class="muted">ajoute les nouveau fichiers au commit créé ou non</small></li>
+		<li><b>$ git commit -a -m "description du commit"</b> <small class="muted">crée un commit</small></li>
+		<li><b>$ git push</b> <small class="muted">push le commit sur github</small></li>
+		<li><b>$ git push heroku master</b> <small class="muted">push le commit sur Heroku</small></li>
+		<li><b>$ bundle install</b> <small class="muted">installe les nouvelles gem</small></li>
+		<li><b>$ rails generate scaffold Model1 nom:string</b> <small class="muted">scaffold un nouveau model</small></li>
+		<li><b>$ rails generate migration create_model1_model2</b> <small class="muted">crée une joint table</small></li>
+		<li><b>$ rails generate controller nomS action action</b> <small class="muted">crée un controller</small></li>
+		<li><b>$ heroku login</b> <small class="muted">connecte à Heroku</small></li>
+		<li><b>$ heroku open</b> <small class="muted">ouvre l'app en production</small></li>
+		<li><b>$ heroku logs</b> <small class="muted">affiche le logs de l'app en production</small></li>
+		<li><b>$ heroku ps</b> <small class="muted">affiche le nombre de dynos actifs</small></li>
+		<li><b>$ heroku ps:scale web=1</b> <small class="muted">fixe le nombre de dynos actifs</small></li>
+		<li><b>$ heroku run xxx</b> <small class="muted">execute une commande sur le server distant</small></li>
+		<li><b>$ heroku run:detached xxx</b> <small class="muted">contourne les limitations de la resid's...</small></li>
+		<li><b>$ heroku run rails console</b> <small class="muted">ouvre la console rails distante</small></li>
+		<li><b>$ bundle exec rackup private_pub.ru -s thin -E production</b> <small class="muted">start bayeux wserver</small></li>
+	</ul>
+	</div>
+
+
+			<h4 class="pull-right"><%= link_to "GitHub", "https://github.com/dherault/zscanrb", :target => "_blank" %></h4>
+	<br>
+	<% end %>
+	<br> <br>
+	<br>
+	<br>
+	<br>
+	<br>
+	<br>
+	<br>
+	<div id="author">
+		<p class="text-right">
+			<small class="muted">Codé par :</small><br>
+			David "(Jøü)² 111" Hérault<br>
+			2013, Sous <a href="#" onclick="copy(); return false">copyright</a><br>
+			
+		</p>
+		<br>
+	</div>
+	<div id="copy" style="display: none">
+		<p>
+			© David Hérault 2012-2013 <br>
+All Rights Reserved <br>
+No part of this website or any of its contents may be reproduced, copied, modified or adapted, without the prior written consent of the author, unless otherwise indicated for stand-alone materials. <br>
+ <br>
+Commercial use and distribution of the contents of the website is not allowed without express and prior written consent of the author. <br>
+		</p>
+		<a href="#" onclick="hidecopy(); return false">Réduire</a>
+	</div>
+</div>
+
+
+
+<script>
+	function copy() {
+		rights = document.getElementById('copy');
+		author = document.getElementById('author');
+		rights.style.display = 'block'
+		author.style.display = 'none'
+	}
+	function hidecopy() {
+		rights = document.getElementById('copy');
+		author = document.getElementById('author');
+		rights.style.display = 'none'
+		author.style.display = 'block'
+	}
+</script>

@@ -1,0 +1,301 @@
+/*Outils*/
+.primary{
+  color: #FFAB00 !important;
+}
+.white{
+	color: #fff;
+}
+.red{
+	color: #e74c3c;
+}
+.green {
+  color: #2ecc71 !important;
+}
+.orange {
+  color: #f39c12;
+}
+.grey {
+  color: #777;
+}
+.done{
+	text-decoration: line-through;
+}
+.rotate-icon
+{
+  -webkit-transition: -webkit-transform 1s;
+  -moz-transition: transform 1s;
+  -webkit-transform: rotate(180deg);
+  -moz-transform: rotate(180deg);
+}
+/*layout*/
+footer{
+	position:fixed;
+	bottom:10px;
+	right:15px;
+	z-index:-1;
+}
+.post-navbar{
+	margin-bottom: 78px; /*Pour cacher la navbar*/
+}
+/*cards*/
+.assign-form{
+	width: 50%;
+	margin: auto;
+}
+.assign-select{
+	width: 50%;
+	margin: auto;
+	font-size: 130%;
+}
+/*shops*/
+.login-form{
+	max-width: 220px;
+	margin-left: -15px;
+}
+/*pages*/
+.info-div{
+	margin-top: 30px;
+	margin-bottom: 15px;
+}
+.info-pg{
+	margin-top: 10px;
+}
+.info-reset{
+	margin-top: -10px;
+	color: #999;
+}
+.info-function{
+	font-size: 140%;
+}
+.checkout-col{
+	padding: 0px !important;
+}
+.history{
+	width: 100%;
+	margin-bottom: 10px;
+	padding: 10px;
+	border: 1px solid;
+	-webkit-border-radius: 8px;
+	-moz-border-radius: 8px;
+	border-radius: 8px;
+}
+.scan{
+	max-width: 200px;
+	margin: auto;
+}
+.scan-form{
+	min-height: 40px;
+}
+/* Stocks */
+.shop-name {
+  font-size: 121%;
+  cursor: pointer;
+  margin-top: +3px;
+  margin-bottom: -8px;
+}
+.true-shop-name {
+  cursor: move;
+}
+.default-cursor {
+  cursor: default;
+}
+.stocks-list {
+  margin-top: 15px;
+  padding-right: 15px;
+  padding-left: 5px;
+  font-size: 20px;
+}
+.stock-product {
+  -webkit-border-radius: 12px;
+  -moz-border-radius: 12px;
+  border-radius: 12px;
+  margin-top: 2px;
+  margin-bottom: 2px;
+  width: 100%;
+  padding-left: 10px;
+  padding-top: 3px;
+  padding-bottom: 3px;
+}
+.product-qty {
+  float: right;
+  margin-right: 5px;
+  font-size: 24px;
+  cursor: pointer;
+}
+.sortable { 
+  margin: 0;
+  margin-top: -20px; 
+  width: 100%; 
+}
+.dragable { 
+  color: #fff;
+  float: left; 
+  width: 18%; 
+  min-height: 370px; 
+  margin-left: 1.6%; 
+  margin-top: 30px;
+  border: 1px solid #444;
+  -webkit-border-radius: 8px;
+  -moz-border-radius: 8px;
+  border-radius: 8px;
+  background-color: #333;
+}
+.dragable-console { 
+  color: #fff;
+  float: left; 
+  width: 57%; 
+  min-height: 370px; 
+  margin-left: 1.6%; 
+  margin-top: 30px;
+  border: 1px solid #444;
+  -webkit-border-radius: 8px;
+  -moz-border-radius: 8px;
+  border-radius: 8px;
+  background-color: #333;
+  padding: 10px;
+}
+.dragplaceholder {
+  -webkit-border-radius: 8px;
+  -moz-border-radius: 8px;
+  border-radius: 8px;
+  width: 18%; 
+  height: 270px; 
+  float: left; 
+  margin-left: 1.6%; 
+  margin-top: 30px;
+  background-color: #444;
+}
+/*Messages*/
+.chat-console{
+  word-wrap: break-word;
+}
+.chat-chatter{
+  padding-left: 50px;
+  padding-right: -20px;
+}
+.chat-box{
+  padding-left: 20px;
+  padding-top: 5px;
+  padding-right: 0px;
+}
+.chat-control{
+  min-width: 300px;
+  max-width: 520px;
+  width: 520px;
+}
+.chat-log{
+  color: #888;
+  font-size: 80%;
+}
+.chat-user{
+  color: #FFAB00;
+  font-size: 140%;
+}
+.chat-chat{
+  color: #fff;
+  font-weight: bold;
+}
+.chat-info{
+  color: #888;
+}
+.chat-stock{
+  color: #888;
+  font-size: 80%;
+}
+.chat-active{
+  color: #FFAB00;
+  font-size: 90%;
+}
+.shop-list{
+  text-align: center;
+  margin-right: auto;
+  margin-left: auto;
+  padding-top: 70px;
+  padding-left: 50px;
+}
+.shop-list-shop{
+  float: left;
+  min-width: 150px;
+  min-height: 100px;
+  border: 1px solid #555;
+  -webkit-border-radius: 8px;
+  -moz-border-radius: 8px;
+  border-radius: 8px;
+  background-color: #333;
+  text-align: center;
+  margin-right: 20px;
+  margin-bottom: 20px;
+
+}
+.shop-list-shop:hover{
+  background-color: #444;
+  cursor: pointer;
+}
+.shop-list-name{
+  margin-top: 5px;
+  margin-bottom: 10px;
+}
+.shop-list-status{
+  font-size: 111%;
+}
+.shop-list-refresh{
+  cursor: pointer;
+  font-size: 130%;
+  margin-top: auto;
+  margin-bottom: auto;
+}
+.watch-box{
+  width: auto;
+  min-height: 300px;
+  background-color: #333;
+  border: 1px solid #444;
+  -webkit-border-radius: 8px;
+  -moz-border-radius: 8px;
+  border-radius: 8px;
+  margin-right: 20px;
+  margin-left: 5px;
+} 
+.watch-text{
+  margin-left: 7px;
+  margin-right: 7px;
+  margin-top: 10px;
+  margin-bottom: 7px;
+  color: #999;
+  min-height: 290px;
+  word-wrap: break-word;
+  max-height: 290px;
+}
+.sdt-active{
+  background-color: #666;
+}
+.sdt{
+  padding-bottom: 10px;
+}
+.tickss{
+  font-size: 150%;
+  font-weight: bold;
+}
+.border-success{
+   border: 10px solid #2ecc71 !important;
+  -webkit-border-radius: 20px;
+  -moz-border-radius: 20px;
+  border-radius: 20px;
+}
+.border-error{
+   border: 10px solid #e74c3c !important;
+  -webkit-border-radius: 20px;
+  -moz-border-radius: 20px;
+  border-radius: 20px;
+}
+.borderable {
+  border: 10px solid #222;
+  margin-top: -10px;
+}
+.clock {
+  font-size: 120%;
+  margin-right: -5px;
+  cursor: default;
+}
+.INESS-brand{
+  cursor: pointer;
+}

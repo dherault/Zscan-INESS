@@ -1,0 +1,31 @@
+<div class="container text-center">
+	<h1>Authentification</h1>
+	<br>
+		<%= form_tag login_path, class: "form-horizontal" do |f| %>
+
+			<div class="form-group">
+			  <div class="col-md-4"></div>	  		
+		      <label class="glyphicon glyphicon-map-marker control-label col-md-1"></label>
+		      <div class="col-md-3">
+		      	<%= text_field_tag :name, nil, placeholder: "Pian'ss", class: 'form-control login-form', id: 'shop' %>
+		      </div>
+		    </div>
+
+		    <br>
+		    <div class="form-group">
+			  <div class="col-md-4"></div>
+		      <label class="glyphicon glyphicon-lock control-label col-md-1"></label>
+		      <div class="col-md-3">
+			      <%= password_field_tag :password, nil, placeholder: "Mot de passe", class: 'form-control login-form' %>
+			  </div>
+		    </div>
+
+		    <br>
+		    <div class="actions">
+		      <%= submit_tag "Connexion", class: 'btn btn-large btn-primary' %>
+		    </div>
+	    <% end %>
+</div>
+<script>
+	$("#shop").focus();
+</script>

@@ -1,0 +1,148 @@
+<nav class="navbar navbar-inverse" role="navigation" id="navbar">
+  <!-- Brand and toggle get grouped for better mobile display -->
+  <div class="navbar-header">
+    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-ex1-collapse">
+      <span class="sr-only">Toggle navigation</span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+    </button>
+    <li class='dropdown navbar-brand'>
+        <span class="dropdown-toggle INESS-brand" data-toggle="dropdown">
+          INESS
+        </span>
+        <ul class="dropdown-menu">
+          <% if session[:shop_level] == 1 || session[:shop_level] == 10 %>
+            <li>
+              <%= link_to saloon_path do %>
+                <span class="glyphicon glyphicon-fire"></span> Bar
+              <% end %>
+            </li>
+          <% end %>
+          <% if session[:shop_level] == 2 || session[:shop_level] == 10 %>
+            <li>
+              <%= link_to checkout_path do %>
+                <span class="glyphicon glyphicon-fire"></span> Caisse
+              <% end %>
+            </li>
+          <% end %>
+          <% if session[:shop_level] == 3 || session[:shop_level] == 10 %>
+            <li>
+              <%= link_to checkout_sdt_path do %>
+                <span class="glyphicon glyphicon-fire"></span> Caisse SDT
+              <% end %>
+            </li>
+          <% end %>
+          <% if session[:shop_level] == 4 || session[:shop_level] == 10 %>
+            <li>
+              <%= link_to stocks_dashboard_path do %>
+                <span class="glyphicon glyphicon-shopping-cart"></span> Appros
+              <% end %>
+            </li>
+          <% end %>
+          <% if session[:shop_level] == 6 || session[:shop_level] == 10 %>
+            <li>
+              <%= link_to chatter_path do %>
+                <span class="glyphicon glyphicon-bullhorn"></span> Chatter
+              <% end %>
+            </li>
+          <% end %>
+          <% if session[:shop_level] == 10 %>
+            <li>
+              <%= link_to stats_path do %>
+                <span class="glyphicon glyphicon-stats"></span> Statistiques
+              <% end %>
+            </li>
+          <% end %>
+          <% if session[:shop_level] == 5 || session[:shop_level] == 10 %>
+            <li>
+              <%= link_to simple_stats_path do %>
+                <span class="glyphicon glyphicon-stats"></span> Grip'sserie
+              <% end %>
+            </li>
+          <% end %>
+          <li>
+            <%= link_to root_path do %>
+              <span class="glyphicon glyphicon-home"></span> Accueil
+            <% end %>
+          </li>
+        </ul>
+      </li>
+  </div>
+
+  <!-- Collect the nav links, forms, and other content for toggling -->
+  <div class="collapse navbar-collapse navbar-ex1-collapse">
+    <ul class="nav navbar-nav">
+      <!-- <li class="active"><a href="#">Link</a></li> -->
+      <% if session[:shop_level] == 10 %>
+        <li>
+          <%= link_to shops_path do %>
+            <span class="glyphicon glyphicon-map-marker"></span> Pian'ss
+          <% end %>
+        </li>
+        <li>
+          <%= link_to users_path do %>
+            <span class="glyphicon glyphicon-user"></span> Clients
+          <% end %>
+        </li>
+        <li>
+          <%= link_to products_path do %>
+            <span class="glyphicon glyphicon-glass"></span> Produits
+          <% end %>
+        </li>
+        <li>
+          <%= link_to specials_path do %>
+            <span class="glyphicon glyphicon-star"></span> Actions
+          <% end %>
+        </li>
+        <li>
+          <%= link_to orders_path do %>
+            <span class="glyphicon glyphicon-list-alt"></span> Commandes
+          <% end %>
+        </li>
+        <li class='dropdown'>
+          <a href="" class="dropdown-toggle" data-toggle="dropdown">
+            <span class="glyphicon glyphicon-credit-card"></span> Cartes
+          </a>
+          <ul class="dropdown-menu">
+            <li><%= link_to 'Liste', cards_path %></li>
+            <li><%= link_to 'Lire', before_read_cards_path %></li>
+            <li><%= link_to 'Assigner', before_assign_cards_path %></li>
+          </ul>
+        </li>
+      <% end %>
+    </ul> 
+    <ul class="nav navbar-nav navbar-right">
+      <li>
+        <a class="clock">00h00</a>
+      </li>
+      <li>
+        <% if session[:shop_id] %>
+          <%= link_to logout_path, method: :post do %>
+            <%= session[:shop_name] %> <i class="glyphicon glyphicon-off"></i>
+          <% end %>
+        <% else %>
+          <%= link_to before_login_path do %>
+            <i class="glyphicon glyphicon-off"></i>
+          <% end %>
+        <% end %>
+      </li>
+    </ul>
+  </div><!-- /.navbar-collapse -->
+</nav>
+<div id="post-navbar"></div>
+
+<script>
+  function refreshTime () {
+    // body...
+    var d = new Date();
+    var h = d.getHours().toString();
+    var m = d.getMinutes().toString();
+    if (h.length < 2) {  h = "0" + h};
+    if (m.length < 2) {  m = "0" + m};
+    $('.clock').html(h+"h"+m);
+  }
+  refreshTime();
+  var whattimeisit = setInterval(refreshTime, 1000*10);
+
+</script>

@@ -1,0 +1,99 @@
+<div class="container text-center">
+	<br>
+	<h1>Assignation des cartes</h1>
+	<br>
+	<div class="assign-form">
+		
+	    <div class="form-group">
+	    	<select id="type" class="assign-select">
+		    	<option value="User">Client</option>
+		    	<option value="Product">Produit</option>
+		    	<option value="Special">Action</option>
+		    </select>
+	    </div>
+
+	    <div class="form-group">
+			<div>
+	    		<select id="products" class="assign-select">
+	    			<% @products.each do |p| %>
+	    				<option value="<%= p.id %>"><%= p.name %></option>
+	    			<% end %>
+				</select>	
+	    		<select id="specials" class="assign-select">
+	    			<% @specials.each do |s| %>
+	    				<option value="<%= s.id %>"><%= s.name %></option>
+	    			<% end %>
+				</select>	
+			</div>
+	    </div>
+
+		<div class="form-group">
+			<input type="text" class="form-control assign-input" id="scan" placeholder="En attente d'un scan" autocomplete="off">
+		</div>
+
+		<p class="lead" data-bind="html: infopg, style: { color: colorpg() < 0 ? '#3498db' : '#2ecc71' }"></p>
+	</div>
+</div>
+
+<script>
+	$("#scan").focus();
+	$("#type").val("User");
+	$("#products").hide();
+	$("#specials").hide();
+	$('#scan').keyup(function(e){
+	    if (e.keyCode == 13) {
+	        $(this).trigger("enterKey");
+	    };
+	});
+
+	$('#type').change(function(){
+		if (this.value=="Product") {
+			$('#products').show();
+			$('#specials').hide();
+		} else if (this.value=="User") {
+			$('#products').hide();
+			$('#specials').hide();
+		} else if (this.value=="Special") {
+			$('#products').hide();
+			$('#specials').show();
+		};
+	});
+
+	var AssignViewModel = function() {
+		var self = this;
+		self.infopg = ko.observable("");
+		self.colorpg = ko.observable(111);
+
+		$('#scan').bind("enterKey",function(e){
+			var uid = this.value;
+			if ($('#type').val()=="Product") {
+				var scannable_id = $('#products').val();
+			} else if ($('#type').val()=="Special"){
+				var scannable_id = $('#specials').val();
+			} else {
+				var scannable_id = 0;
+			};
+			self.infopg("...");
+			json_data = {scannable_type: $('#type').val(), scannable_id: scannable_id, uid: uid};
+			$.post("<%= url_for(assign_cards_path) %>", json_data, function(server_data) {
+	            if (server_data.status == "success") {
+	            	if (typeof server_data.card != 'undefined') {
+	            		self.colorpg(-111);
+	            		self.infopg('Déjà assignée :<br>'+server_data.card);
+	            	} else {
+	            		self.colorpg(111);
+	            		self.infopg('Assignation réussie !<br>'+server_data.scannable+'<br>Carte #'+uid);
+	            	};
+	            } else {
+	            	alert('Quelque chose s\'est mal passé, réessaye !');
+	            };
+	        }).error(function() {
+	            alert('erreur lors du post AJAX! Recharge la page avant de continuer.')
+	        });
+			this.value=null;
+		});
+	};
+
+	ko.applyBindings(new AssignViewModel());
+
+</script>

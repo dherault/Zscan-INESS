@@ -1,0 +1,124 @@
+<div class="container">
+<p>Afficher les transfers de credit</p>
+<h1>Ventes aux bars</h1>
+<h2 class="red">Total : <%= number_with_precision(@total_saloon, :precision => 2) %>€</h2>
+
+<table class='table table-hover'>
+  <tr>
+    <th>id</th>
+    <th>Pian'ss</th>
+    <th>Clients</th>
+    <th>Produits</th>
+    <th>Total</th>
+    <th>Heure</th>
+  </tr>
+
+<% @orders.each do |order| %>
+  <% if order.total >= 0 %>
+    <tr>
+      <td><%= order.id %></td>
+      <td><%= order.shop.name %></td>
+      <td>
+        <% order.users.each do |user| %>
+        <%= user.card.uid %>
+        <% end %>
+      </td>
+      <td>
+        <% order.products.each do |product| %>
+        <%= product.name %>
+        <% end %>
+      </td>
+      <td><%= number_with_precision(order.total, :precision => 2) %></td>
+      <td><%= order.created_at.hour.to_s+'h'+order.created_at.min.to_s %></td>
+    </tr>
+  <% end %>
+<% end %>
+</table>
+
+<br>
+
+<h1>Encaissements</h1>
+<h2 class="red">Total : <%= number_with_precision(@total_checkout, :precision => 2) %>€</h2>
+
+<table class='table table-hover'>
+  <tr>
+    <th>id</th>
+    <th>Pian'ss</th>
+    <th>Client</th>
+    <th>Total</th>
+    <th>Heure</th>
+  </tr>
+
+<% @orders.each do |order| %>
+  <% if order.total < 0 %>
+    <tr>
+      <td><%= order.id %></td>
+      <td><%= order.shop.name %></td>
+      <td><%= order.users[0].card.uid %></td>
+      <td><%= number_with_precision(order.total, :precision => 2) %></td>
+      <td><%= order.created_at.hour.to_s+'h'+order.created_at.min.to_s %></td>
+    </tr>
+  <% end %>
+<% end %>
+</table>
+
+<h1>Annulations aux bars</h1>
+
+<table class='table table-hover'>
+  <tr>
+    <th>id</th>
+    <th>Pian'ss</th>
+    <th>Clients</th>
+    <th>Produits</th>
+    <th>Montant</th>
+    <th>Heure</th>
+  </tr>
+
+<% @cancelled_orders.each do |order| %>
+  <% if order.total >= 0 %>
+    <tr>
+      <td><%= order.id %></td>
+      <td><%= order.shop.name %></td>
+      <td>
+        <% order.users.each do |user| %>
+        <%= user.card.uid %>
+        <% end %>
+      </td>
+      <td>
+        <% order.products.each do |product| %>
+        <%= product.name %>
+        <% end %>
+      </td>
+      <td><%= number_with_precision(order.total, :precision => 2) %></td>
+      <td><%= order.created_at.hour.to_s+'h'+order.created_at.min.to_s %></td>
+    </tr>
+  <% end %>
+<% end %>
+</table>
+
+<br>
+
+<h1>Annulations aux caisses</h1>
+
+<table class='table table-hover'>
+  <tr>
+    <th>id</th>
+    <th>Pian'ss</th>
+    <th>Client</th>
+    <th>Montant</th>
+    <th>Heure</th>
+  </tr>
+
+<% @cancelled_orders.each do |order| %>
+  <% if order.total < 0 %>
+    <tr>
+      <td><%= order.id %></td>
+      <td><%= order.shop.name %></td>
+      <td><%= order.users[0].card.uid %></td>
+      <td><%= number_with_precision(order.total, :precision => 2) %></td>
+      <td><%= order.created_at.hour.to_s+'h'+order.created_at.min.to_s %></td>
+    </tr>
+  <% end %>
+<% end %>
+</table>
+</div>

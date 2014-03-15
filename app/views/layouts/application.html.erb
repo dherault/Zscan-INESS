@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <title>INESS</title>
+    <%= stylesheet_link_tag    "application", media: "all" %>
+    <%= javascript_include_tag "application" %>
+    <%= csrf_meta_tags %>
+  </head>
+
+  <body>
+    <%= render 'layouts/navbar' %>
+    <%= render 'layouts/flash_messages' %>
+    <%= yield %>
+    <br>
+  </body>
+
+  <footer>
+        <span class="pull-right text-muted small">@INESSproject</span>
+  </footer>
+
+</html>

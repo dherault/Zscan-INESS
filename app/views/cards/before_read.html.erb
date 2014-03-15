@@ -1,0 +1,48 @@
+<div class="container text-center">
+	<br>
+	<h1>Lecture des cartes</h1>
+	<br>
+		<div class="assign-form">
+			
+			<div class="form-group">
+				<input type="text" class="form-control assign-input" id="scan" placeholder="En attente d'un scan" autocomplete="off">
+			</div>
+
+			<p class="lead" data-bind="html: infopg, style: { color: colorpg() < 0 ? '#e74c3c' : '#2ecc71' }"></p>
+		</div>
+</div>
+
+<script>
+	$("#scan").focus();
+	$('#scan').keyup(function(e){
+	    if (e.keyCode == 13) {
+	        $(this).trigger("enterKey");
+	    };
+	});
+
+	var ReadViewModel = function() {
+		var self = this;
+		self.infopg = ko.observable("");
+		self.colorpg = ko.observable(111);
+
+		$('#scan').bind("enterKey",function(e){
+			var uid = this.value;
+			self.infopg("...");
+			$.post("<%= url_for(read_cards_path) %>", {uid: uid}, function(server_data) {
+	            if (server_data.status == "success") {
+            		self.colorpg(111);
+            		self.infopg('Carte #' + uid + '<br>'+server_data.name);
+	            } else {
+            		self.colorpg(-111);
+            		self.infopg('carte inconnue');
+	            };
+	        }).error(function() {
+	            alert('erreur lors du post AJAX! Recharge la page avant de continuer.');
+	        });
+			this.value=null;
+		});
+	};
+
+	ko.applyBindings(new ReadViewModel());
+
+</script>

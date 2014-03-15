@@ -1,0 +1,36 @@
+<div class="container">
+  
+<h1>Points de vente</h1>
+<%= link_to 'Nouveau Pian\'ss', new_shop_path %>
+<br><br>
+<table class='table table-hover'>
+  <thead>
+    <tr>
+      <th>Nom</th>
+      <th>Description</th>
+      <th>Niveau</th>
+      <th>Produits</th>
+      <th>Actions</th>
+      <th></th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <% @shops.each do |shop| %>
+      <tr>
+        <td><%= shop.name %></td>
+        <td><%= shop.description %></td>
+        <td><%= shop.level %></td>
+        <td><%= link_to shop.products.length, view_products_path(shop) %></td>
+        <td><%= link_to shop.specials.length, view_specials_path(shop) %></td>
+        <td><%= link_to 'Stats', shop %></td>
+        <td><%= link_to 'Modifier', edit_shop_path(shop) %></td>
+        <td><%= link_to 'Supprimer', shop, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+</div>

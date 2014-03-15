@@ -1,0 +1,107 @@
+	<div class="row">
+		<div class="col-md-6 chat-chatter">
+			<h1>Chat</h1>
+			<p>Permet de communiquer avec tous les ordis du programme</p>
+			enlever le '@' sur dashboard et chatter
+
+			<form class="form-inline" role="form" id="chatform">
+			  <div class="form-group">
+			    <input type="text" class="form-control chat-control" id="message" placeholder="Say something, they'll know">
+			  </div>
+			  <button type="submit" class="btn btn-default">Send</button>
+			</form>
+
+			<br>
+			<br>
+			<div id="chat"></div>
+		</div>
+		<div class="col-md-6">
+			<div class="shop-list">
+				
+				<% @shops.each do |shop| %>
+					<div class="shop-list-shop">
+						<div class="shop-list-name primary"><%= shop.name %></div>
+						<span class="glyphicon glyphicon-eye-open shop-list-status grey" id="<%= shop.name %>"></span>
+					</div>
+				<% end %>
+				<div class="clearfix"></div>
+			</div>
+			<div class="text-center">
+				<span class="glyphicon glyphicon-refresh shop-list-refresh grey" onClick="refreshList()"></span>
+			</div>
+		</div>
+	</div>
+
+<script>
+	
+socket = new WebSocket("ws://"+window.location.host+"/handlews/chatter/<%= session[:shop_name] %>");
+
+socket.onopen = function(){  
+	var d = new Date;
+  	socket.send("<%= session[:shop_name] %> vient de se connecter sur le canal chatter@active");
+  	socket.send("scan_start@query");
+}  
+socket.onmessage = function(msg){  
+  var res = msg.data.split("@");
+  console.log(res[1]+" -"+res[3]+" : "+res[2]);
+  if(!$('#'+res[1]).hasClass("green")){
+    $('#'+res[1]).addClass("green");
+  }
+  var d = new Date;
+  good:
+  switch(res[3])
+  {
+  case "chat":
+    $("#chat").prepend("<p><small>"+d.getHours()+":"+d.getMinutes()+" </small>"+res[1]+"<small>@"+res[0]+" : </small><span class='chat-chat'>"+res[2]+"</span><p/>");
+      break;
+  case "info":
+    $("#chat").prepend("<p><small>"+d.getHours()+":"+d.getMinutes()+" </small>"+res[1]+"<small>@"+res[0]+" : </small><span class='chat-info'>"+res[2]+"</span><p/>");
+      break;
+  case "active":
+  	$("#chat").prepend("<p><small>"+d.getHours()+":"+d.getMinutes()+" </small>"+res[1]+"<small>@"+res[0]+" : </small><span class='chat-info'>"+res[2]+"</span><p/>");
+  	$('#'+res[1]).addClass("green");
+  case "query":
+  	evil:
+  	switch(res[2])
+  	{
+		case "scan_start":
+	        socket.send("scan_back@query");
+	        break evil;
+  	}
+
+  	break;
+  }
+}  
+// socket.onclose = function(){  
+//   socket.send("<%= session[:shop_name] %> s'est déconnecté@inactive");
+// }
+
+function sendMessage () {
+  socket.send($("#message").val()+"@chat");  
+  $("#message").val("");
+}
+
+function refreshList () {
+	console.log("Debut du scan")
+	$(".glyphicon-refresh").addClass("rotate-icon");
+	$(".glyphicon-eye-open").removeClass("green");
+  	socket.send("scan_start@query");
+	$(".glyphicon-refresh").addClass("rotate-icon");
+  	setTimeout(function(){
+		$(".glyphicon-refresh").removeClass("rotate-icon");
+      }, 1000);
+}
+
+var tid = setInterval(refreshList, 1000*5);
+
+function abortTimer() { // to be called when you want to stop the timer
+  clearInterval(tid);
+}
+
+
+$( "#chatform" ).submit(function( event ) {
+	sendMessage()
+	event.preventDefault();
+});
+
+</script>

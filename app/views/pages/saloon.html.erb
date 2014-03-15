@@ -1,0 +1,551 @@
+<div class="row">
+
+<!-- Chat -->
+<div class="col-md-3">
+    <h3>Messages</h3>
+    <div id="chat"></div>
+</div>
+
+<div class="col-md-6 borderable">
+
+    <!-- Titre -->
+    <div class="text-center">
+        <h1>Bar <%= session[:shop_name] %></h1>
+    </div>
+
+    <!-- Texte d'information -->
+    <div class="text-center info-div lead">
+        <span data-bind="visible: true, text: infoFunction, style: { color: colorPg() < 0 ? '#e74c3c' : '#3498DB' }" class="info-function"></span>
+        <br>
+        <div class="info-pg"></div>
+        <span data-bind="visible: true, text: infoPg, style: { color: colorPg() < 0 ? '#e74c3c' : '#2ecc71' }"></span>
+    </div>
+    
+    <!-- Scan -->
+    <form data-bind='submit: computeScan' class="text-center lead scan-form">
+        <input autofocus id="scan" class="form-control scan" type="password" data-bind='value: itemToAdd, valueUpdate: "afterkeydown"' autocomplete="off"/>
+    </form>
+    <div class="text-center lead info-reset" data-bind="visible: true, html: infoReset"></div>
+
+    <table data-bind='visible: products().length > 0' class="table lead">
+        <thead>
+            <tr>
+                <th>Produit</th>
+                <th>Quantité</th>
+                <th>Prix</th>
+            </tr>
+        </thead>
+        <tbody data-bind='foreach: products'>
+            <tr>
+                <td width="70%"><span data-bind='text: name'></span></td>
+                <td width="20%"><span data-bind='text: qte'></span></td>
+                <td width="10%"><span data-bind='text: price'></span></td>
+            </tr>
+        </tbody>
+    </table>
+        
+</div>
+    
+
+<!-- Historique -->
+<div class="col-md-3">
+    <div>
+        <h3 class="text-right">Historique</h3>
+        <div data-bind='template: { foreach: orders, afterAdd: showOrder }'>
+            <div class="history">
+                <table width="100%">
+                    <tr>
+                        <td width="70%">
+                            <span>Montant : <span data-bind='text: amount'></span>€</span>
+                        </td>
+                        <td width="30%" class="text-right">
+                            à <span data-bind='text: date'></span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="70%">
+                            <span class="small">Client <span data-bind='text: users'></span></span>
+                        </td>
+                        <td width="30%" class="text-right">   
+                            <span class="small">n°<span data-bind='text: id'></span></span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <span class="small">Produits : <span data-bind='text: items'></span></span>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+
+<script>
+
+function addOrder(id, amount, date, users, items) {
+    var self    = this;
+    self.id     = id;
+    self.amount = amount;
+    self.date   = date;
+    self.users  = users;
+    self.items  = items;
+};
+function prependChat (user, channel, type, msg) {
+  // body...
+  var d = new Date;  
+  $("#chat").prepend("<p><span class='chat-log'>"+d.getHours()+":"+d.getMinutes()+" <span class='chat-user'>"+user+"</span>@"+channel+" : </span><span class='chat-"+type+"'>"+msg+"</span><p/>");
+}
+
+socket = new WebSocket("ws://"+window.location.host+"/handlews/stock/<%= session[:shop_name] %>");
+
+socket.onopen = function(){
+  socket.send("<%= session[:shop_name] %> vient de se connecter sur le canal order@active");
+}  
+socket.onmessage = function(msg){  
+  console.log(msg.data);
+  var res = msg.data.split("@");
+  var d = new Date;
+  good:
+  switch(res[3])
+  {
+  case "chat":
+    prependChat(res[1],res[0],res[3],res[2]);
+    break;
+  case "info":
+      //prependChat(res[1],res[0],res[3],res[2]);
+    break;
+  case "active":
+      //prependChat(res[1],res[0],res[3],res[2]);
+    break;
+  case "query":
+    evil:
+    switch(res[2])
+    {
+      case "scan_start":
+        socket.send("scan_back@query");
+        break evil;
+    }
+    break;
+  }
+}  
+// socket.onclose = function(){  
+//   socket.send("<%= session[:shop_name] %> s'est déconnecté@inactive");
+// }
+// window.onbeforeunload = function(e){
+//     socket.close();
+// }
+
+var SaloonViewModel = function() {
+    //moi c'est ça
+    var self = this;
+
+    //Les variables pour le débucquage
+    var lastOrderId   = -1;
+    var lastItem      = null;
+    //var userId        = null;
+    //var userUid       = null;
+    var checkCancel   = [true,true];
+    var doTransfer    = false;
+    var doAppro       = false;
+    var transferCard  = null;
+    var transfertUids = [null,null];
+    self.infoPg       = ko.observable("Scanne une carte produit, client ou action");
+    self.infoFunction = ko.observable("");
+    self.infoReset    = ko.observable("");
+    self.colorPg      = ko.observable(111);
+    self.products     = ko.observableArray();
+    self.itemToAdd    = ko.observable("");
+    self.orders       = ko.observableArray([ 
+        <% @shoporders.each do |o| 
+            s =  'new addOrder(' + o.id.to_s + ',"' + number_with_precision(o.total, :precision => 2).to_s + '","' + o.created_at.hour.to_s + 'h' + o.created_at.min.to_s + '",['
+            uids_array = ''
+            o.users.each do |user|
+                uids_array += '"' + user.card.uid + '",'
+            end 
+            s += uids_array[0..-2] + '],['
+            names_array = ''
+            o.products.each do |product|
+                names_array += '"' + product.name + '",'
+            end
+            s += names_array[0..-2] + ']),' %>
+            <%= raw s %>
+        <% end %>
+    ]);
+    self.totalSurcharge = ko.computed(function() {
+        var total = 0;
+        for (var i = 0; i < self.products().length; i++) {
+            total += self.products()[i].price * self.products()[i].qte;
+        };
+        return total.toFixed(2);
+    });
+    var productsAvailable = [
+        <% @products.each do |product|
+            s = '{ id:' + product.id.to_s + ', name: "' + product.name + '", price: ' + product.price.to_s + ', cardsUids: ['
+            uids_array = ''
+            product.cards.each do |c|
+                uids_array += '"' + c.uid + '",'
+            end
+            s += uids_array[0..-2] + ']},' %>
+            <%= raw s %>
+        <% end %> 
+    ];
+    var specials = [
+        <% @specials.each do |special|
+            s = '{ id:' + special.id.to_s + ', function: "' + special.function + '", cardsUids: ['
+            uids_array = ''
+            special.cards.each do |c|
+                uids_array += '"' + c.uid + '",'
+            end
+            s += uids_array[0..-2] + ']},' %>
+            <%= raw s %>
+        <% end %> 
+    ];
+
+    self.computeScan = function() {
+        var computed = false;
+        lastItem = self.itemToAdd();
+
+        if (!checkCancel[0] && checkCancel[1]) {
+            checkCancel[1] = false;
+        } else if (!checkCancel[0] && !checkCancel[1]) {
+            checkCancel = [true, true];
+        };
+
+        if (doTransfer == true) {
+            if (self.itemToAdd() == transferCard) {
+                self.resetAll();
+                computed = true;
+            } else {
+                self.transferAmount();
+                self.itemToAdd("");
+                $("#scan").focus();
+                computed = true;
+            };
+        } else if (doAppro == true) {
+            self.callForProvision();
+            self.itemToAdd("");
+            $("#scan").focus();
+            computed = true;
+        } else {
+            dance_with_specials:
+            for (var i = 0; i < specials.length; i++) {
+                for (var j = 0; j < specials[i].cardsUids.length; j++) {
+                    if (specials[i].cardsUids[j] == self.itemToAdd()) {
+                        self.resetAll();
+                        self[specials[i].function](); //Yeah !
+                        computed = true;
+                        break dance_with_specials;
+                    };
+                };
+            };
+        };
+
+        if (!computed) {
+            dance_with_products:
+            for (var i = 0; i < productsAvailable.length; i++) {
+                for (var j = 0; j < productsAvailable[i].cardsUids.length; j++) {
+                    if (productsAvailable[i].cardsUids[j] == self.itemToAdd()) {
+                        self.colorPg(111);
+                        var fini = false;
+                        for (var k = 0; k < self.products().length; k++) {
+                            //Si le product à déjà été ajouté
+                            if (self.products()[k].id == productsAvailable[i].id) {
+
+                                var quantite = parseInt(self.products()[k].qte) + 1;
+                                self.products.remove(self.products()[k]);
+                                self.products.push({
+                                    id: productsAvailable[i].id,
+                                    name: productsAvailable[i].name,
+                                    price: productsAvailable[i].price,
+                                    qte: quantite
+                                });
+                                fini = true;
+                                break;
+                            };
+                        };
+                        if (fini == false) {
+                            self.products.push({
+                                id: productsAvailable[i].id,
+                                name: productsAvailable[i].name,
+                                price: productsAvailable[i].price,
+                                qte: 1
+                            });
+                        };
+                        self.infoPg("Scanne une carte produit, client ou action");
+                        self.infoFunction("Total : " + self.totalSurcharge() + " €");
+                        computed = true;
+                        break dance_with_products;
+                    };
+                };
+            };
+        };
+
+        if (!computed) {
+            if (self.products().length == 0) {
+                self.blockInput();
+                $.post("<%= url_for get_user_by_card_path %>", {uid: lastItem}, function(serverData) {
+                    console.log(serverData);
+                    if (serverData.status == "success") {
+                        self.colorPg(111);
+                        self.infoFunction("Client #"+lastItem);
+                        self.infoPg("Restant : " + serverData.data.amount.toFixed(2) + " €");
+                    } else {
+                        self.colorPg(-111);
+                        self.infoFunction("Erreur");
+                        self.infoPg(decodeURI(serverData.data));
+                    };
+                }).fail(function() {
+                    alert('erreur lors du post AJAX! Recharge la page avant de continuer.');
+                }).always(function() {
+                    self.blockInput();
+                });
+            } else {
+                //fonction de debuquage avec un seul argument client.
+                self.placeOrder([lastItem], self.products());
+            };
+        };
+        self.itemToAdd("");
+    };
+
+    self.placeOrder = function(users, products) {
+        console.log(products);
+        self.blockInput();
+        var jsonData = {users: users, products: ko.toJSON(products), total: self.totalSurcharge}
+        self.infoFunction('Veuillez patienter...');
+        self.infoPg('...');
+        $.post("<%= url_for save_saloon_path %>", jsonData, function(serverData) {
+            console.log(serverData);
+            if (serverData.status == "success") {
+                lastOrderId = serverData.id;
+                var a       = Number(self.totalSurcharge()).toFixed(2);
+                var d       = new Date();
+                var h       = d.getHours();
+                var m       = d.getMinutes();
+                var u       = users;
+                var p       = [<%= session[:shop_id] %>];
+                var ph      = []
+                var k       = 1;
+                for (var i = 0; i < self.products().length; i++) {
+                    for (var j = 0; j < self.products()[i].qte; j++) {
+                        p[k] = self.products()[i].id;
+                        ph[k-1] = self.products()[i].name;
+                        k += 1;
+                    };
+                };
+                if (m.toString().length < 2) {
+                    m = "0" + m.toString()
+                };
+                self.orders.unshift(new addOrder(lastOrderId, a, h + 'h' + m, u, ph));
+                if (self.orders().length > 5) {
+                    self.orders.pop();
+                };
+                console.log(p+"@stock");
+                socket.send(p+"@stock");
+                self.resetAll();
+                self.colorPg(111);
+                self.infoFunction('Vous pouvez servir.');
+                self.infoPg("Nouveau montant : "+serverData.amount+'€');
+                self.toggleBorder(true);
+            } else {
+                self.colorPg(-111);
+                self.infoFunction('Ne pas servir.');
+                self.infoPg(decodeURI(serverData.data));
+                self.products.removeAll();
+                self.toggleBorder(false);
+
+            };
+        }).fail(function() {
+            alert('erreur lors du post AJAX! Recharge la page avant de continuer.');
+        }).always(function() {
+            self.blockInput();
+        });
+    };
+
+    self.cancelOrder = function() {
+        if (self.orders()[0].id == lastOrderId) {
+            checkCancel[1] = true;
+            if (checkCancel[0] == true) {
+                self.infoFunction('Annulation');
+                self.infoPg('Repasse la carte annulation pour confirmer');
+                checkCancel[0] = false;
+            } else {
+                self.blockInput();
+                checkCancel[0] = true;
+                $.post("<%= url_for cancel_order_path %>", {order_id: lastOrderId}, function(serverData) {
+                    console.log(serverData);
+                    if (serverData.status == "success") {
+                        self.resetAll();
+                        lastOrderId = -1;
+                        self.infoFunction('Annulation réussie !');
+                        self.orders.shift();
+                    } else {
+                            //Là il faut peut etre mettre un resetAll(), voir les test
+                        self.colorPg(-111);
+                        self.infoPg(decodeURI(serverData.data));
+                    };
+                }).fail(function() {
+                    alert('erreur lors du post AJAX! Recharge la page avant de continuer.');
+                }).always(function() {
+                    self.blockInput();
+                });
+            };
+        } else {
+            self.colorPg(-111);
+            self.infoPg("Seule la dernière commande peut être annulée");
+        };
+    };
+
+    self.transferAmount = function() {
+        self.infoFunction('Vider une carte dans une autre');
+        self.infoReset("Repasse la carte action 'Transfert' pour annuler");
+        
+        if (doTransfer == false) {
+            self.infoPg("Scanne d'abord la carte client à vider");
+            transferCard = lastItem;
+            doTransfer = true;
+        } else if (doTransfer == true && transfertUids[0] == null) {
+            transfertUids[0] = lastItem;
+            self.infoPg("Scanne maintenant la carte client à remplir");
+        } else if (doTransfer == true && transfertUids[0] != null) {
+            self.blockInput();
+            transfertUids[1] = lastItem;
+            $.post("<%= url_for transfer_path %>", {uid1: transfertUids[0], uid2: transfertUids[1]}, function(serverData) {
+                console.log(serverData);
+                self.resetAll();
+                if (serverData.status == "success") {
+                    self.colorPg(111);
+                    self.infoFunction('Transfert réussi !');
+                    self.infoPg("Nouveau montant de la 2ème carte: "+serverData.amount+'€');
+                } else {
+                    self.colorPg(-111);
+                    self.infoFunction('Transfert échoué');
+                    self.infoPg(decodeURI(serverData.data));
+                };
+            }).fail(function() {
+                alert('erreur lors du post AJAX! Recharge la page avant de continuer.');
+            }).always(function() {
+                self.blockInput();
+            });
+        };
+    };
+
+    self.blockInput = function() {
+        $('#scan').toggle();
+        if ($('#scan').is(":visible")) {
+            $('#scan').focus();
+        };
+    };
+
+    self.hideNavbar = function() {
+        if ($('#navbar').is(':hidden')) {
+            $('#navbar').show();
+            $('#post-navbar').removeClass('post-navbar');
+        } else {
+            $('#navbar').hide();
+            $('#post-navbar').addClass('post-navbar');
+        };
+    };
+
+    self.reloadWindow = function() {
+        location.reload(true);
+    };
+
+    self.removeItem = function(product) {
+        self.products.remove(product);
+    };
+
+    self.showOrder = function(elem) {
+        if (elem.nodeType === 1) $(elem).hide().css('opacity', 0).slideDown('slow').animate({
+            opacity: 1
+        }, {
+            queue: false,
+            duration: 1200
+        });
+    };
+
+    self.toggleBorder = function(success) {
+        if (success == true) {
+            $(".borderable").toggleClass('border-success');
+            setTimeout(function(){
+              $(".borderable").toggleClass('border-success');
+            }, 500);
+            setTimeout(function(){
+              $(".borderable").toggleClass('border-success');
+            }, 1000);
+            setTimeout(function(){
+              $(".borderable").toggleClass('border-success');
+            }, 1500);
+            setTimeout(function(){
+              $(".borderable").toggleClass('border-success');
+            }, 2000);
+            setTimeout(function(){
+              $(".borderable").toggleClass('border-success');
+            }, 2500);
+        } else{
+            $(".borderable").toggleClass('border-error');
+            setTimeout(function(){
+              $(".borderable").toggleClass('border-error');
+            }, 500);
+            setTimeout(function(){
+              $(".borderable").toggleClass('border-error');
+            }, 1000);
+            setTimeout(function(){
+              $(".borderable").toggleClass('border-error');
+            }, 1500);
+            setTimeout(function(){
+              $(".borderable").toggleClass('border-error');
+            }, 2000);
+            setTimeout(function(){
+              $(".borderable").toggleClass('border-error');
+            }, 2500);
+        };
+    }
+
+    self.resetAll = function() {
+        self.itemToAdd("");
+        self.infoPg("Scanne une carte produit, client ou action");
+        self.infoFunction("");
+        self.infoReset("");
+        self.colorPg(111);
+        self.products.removeAll();
+        doTransfer    = false;
+        doAppro       = false;
+        transferCard  = null;
+        transfertUids = [null, null];
+        $("#scan").focus();
+    };
+
+    self.callForHelp = function() {
+        self.resetAll();
+        socket.send("Appelle à l'aide@info");
+        self.infoPg("S.O.S. envoyé !");
+    };
+
+    self.callForProvision = function() {
+        if (doAppro == false) {
+            self.resetAll();
+            self.infoPg("Scanne la carte du produit manquant");
+            self.infoFunction("Approvisionnement");
+            doAppro = true;
+        } else {
+            for (var i = 0; i < productsAvailable.length; i++) {
+                for (var j = 0; j < productsAvailable[i].cardsUids.length; j++) {
+                    if (productsAvailable[i].cardsUids[j] == self.itemToAdd()) {
+                        self.resetAll();
+                        socket.send("On a plus de "+productsAvailable[i].name+"@info");
+                        self.infoPg("Demande de "+productsAvailable[i].name+" effectuée!")
+                        self.infoFunction("Approvisionnement");
+                    };
+                };
+            };
+        };  
+    };
+};
+
+ko.applyBindings(new SaloonViewModel());
+
+</script>
+
+

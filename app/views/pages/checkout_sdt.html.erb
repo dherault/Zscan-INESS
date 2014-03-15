@@ -1,0 +1,486 @@
+<div class="row">
+<!-- Chat -->
+<div class="col-md-3">
+    <h3>Messages</h3>
+    <div id="chat"></div>
+</div>
+
+<div class="col-md-6">
+    <!-- Titre -->
+    <div class="text-center sdt-active sdt" id="entree">
+    <div>
+        
+        <h1>Entrée</h1>
+        <p class="lead" id="entreetxt">Scanne une carte </p>
+    </div>
+<div class="row lead">
+<div class="col-md-4"></div>
+<div class="col-md-4">
+            <form id="formtrads" data-bind="submit: checkoutTrads">
+                <input autofocus id="trads" class="form-control" type="text" autocomplete="off"/>
+            </form>
+            </div></div>
+
+    </div>
+    <div id="sortie" class="sdt">
+        
+    <!-- Titre -->
+    <div class="text-center" >
+        <h1>Sortie</h1>
+    </div>
+    <!-- Texte d'information -->
+    <div class="text-center info-div lead">
+        <span data-bind="visible: true, text: infoFunction, style: { color: colorPg() < 0 ? '#e74c3c' : '#3498DB' }"></span>
+        <br>
+        <div class="info-pg"></div>
+        <span data-bind="visible: true, text: infoPg, style: { color: colorPg() < 0 ? '#e74c3c' : '#2ecc71' }"></span>
+    </div>
+    
+    <!-- Scan -->
+    <div class="row lead">
+        <div class="col-md-4 text-right checkout-col">
+            <div data-bind="visible: phase() < 0"><span data-bind="text: Number(currentAmount()).toFixed(2)"></span> +</div>
+        </div>
+        <div class="col-md-4">
+            <form data-bind="submit: computeScan, visible: phase() > 0">
+                <input id="scan" class="form-control" type="password" data-bind='value:itemToAdd, valueUpdate: "afterkeydown"' autocomplete="off"/>
+            </form>
+            <form data-bind="submit: placeOrder, visible: phase() < 0" >
+                <input id="addedAmount" class="form-control" type="text" data-bind='value: addedAmount, valueUpdate: "afterkeydown"' autocomplete="off" placeholder="0"/>
+            </form>
+        </div>
+        <div class="col-md-4 checkout-col">
+           <div data-bind="visible: phase() < 0">= <span data-bind="text: total"></span></div>
+        </div>
+    </div>
+    <div class="text-center lead info-reset" data-bind="visible: true, html: infoReset"></div>
+    </div>
+
+    
+</div>
+
+<!-- Historique -->
+<div class="col-md-3">
+    <div>
+        <h3 class="text-right">Historique</h3>
+        <div data-bind='template: {foreach: orders, afterAdd: showOrder}'>
+            <div class="history">
+                <table width="100%">
+                    <tr>
+                        <td width="70%">
+                            <span>Montant : <span data-bind='text: amount'></span>€</span>
+                        </td>
+                        <td width="30%" class="text-right">
+                            à <span data-bind='text: date'></span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="70%">
+                            <span class="small">Client <span data-bind='text: user'></span></span>
+                        </td>
+                        <td width="30%" class="text-right">   
+                            <span class="small">n°<span data-bind='text: id'></span></span>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+
+<script>
+$( document ).ready(function() {
+console.log( "ready!" );
+$("#trads").focus();
+});
+
+
+
+function addOrder(user, amount, date, id) {
+    var self    = this;
+    self.user   = user;
+    self.amount = amount;
+    self.date   = date;
+    self.id     = id;
+};
+
+function prependChat (user, channel, type, msg) {
+  // body...
+  var d = new Date;  
+  $("#chat").prepend("<p><span class='chat-log'>"+d.getHours()+":"+d.getMinutes()+" <span class='chat-user'>"+user+"</span>@"+channel+" : </span><span class='chat-"+type+"'>"+msg+"</span><p/>");
+}
+
+socket = new WebSocket("ws://"+window.location.host+"/handlews/stock/<%= session[:shop_name] %>");
+
+socket.onopen = function(){
+  socket.send("<%= session[:shop_name] %> vient de se connecter sur le canal order@active");
+}  
+socket.onmessage = function(msg){  
+  console.log(msg.data);
+  var res = msg.data.split("@");
+  var d = new Date;
+  good:
+  switch(res[3])
+  {
+  case "chat":
+    prependChat(res[1],res[0],res[3],res[2]);
+    break;
+  case "info":
+      prependChat(res[1],res[0],res[3],res[2]);
+    break;
+  case "active":
+      //prependChat(res[1],res[0],res[3],res[2]);
+    break;
+  case "query":
+    evil:
+    switch(res[2])
+    {
+      case "scan_start":
+        socket.send("scan_back@query");
+        break evil;
+    }
+    break;
+  }
+}  
+
+var CheckoutViewModel = function() {
+    //moi c'est ça
+    var self = this;
+
+    //Les variables pour le débucquage
+    var lastOrderId    = -1;
+    var lastItem       = null;
+    var userId         = null;
+    var userUid        = null;
+    var checkCancel    = [true,true];
+    var doTransfer     = false;
+    var transferCard   = null;
+    var transfertUids  = [null,null];
+    self.itemToAdd     = ko.observable("");
+    self.infoPg        = ko.observable("Scanne une carte :");
+    self.infoFunction  = ko.observable("");
+    self.infoReset     = ko.observable("");
+    self.colorPg       = ko.observable(111);
+    self.currentAmount = ko.observable();
+    self.addedAmount   = ko.observable("");
+    self.phase         = ko.observable(111);
+    self.total         = ko.computed(function() {
+        var total = Number(self.currentAmount()) + Number(self.addedAmount());
+        if (isNaN(total)) {
+            return "Erreur";
+        } else {
+            return total.toFixed(2);
+        };
+    });
+    self.orders = ko.observableArray([ 
+        <% @shoporders.each do |o| %> 
+        <%= raw 'new addOrder("' + o.users[0].card.uid + '","' + number_with_precision(-o.total, :precision => 2).to_s + '","' + o.created_at.to_s[11..12] + 'h' + o.created_at.to_s[14..15] + '",' + o.id.to_s + '),' %> 
+        <% end %>
+    ]);
+
+    var specials = [
+        <% @specials.each do |special|
+            s = "{ id:" + special.id.to_s + ", function: '" + special.function + "', cardsUids: ["
+            uids_array = ''
+            special.cards.each do |c|
+                uids_array += "'" + c.uid + "',"
+            end
+            s += uids_array[0..-2] + ']},' %>
+            <%= raw s %>
+        <% end %> 
+    ];
+
+
+    self.computeScan = function() {
+        var computed = false;
+        lastItem = self.itemToAdd();
+        //J'aime le code.
+        if (!checkCancel[0] && checkCancel[1]) {
+            checkCancel[1] = false;
+        } else if (!checkCancel[0] && !checkCancel[1]) {
+            checkCancel = [true, true];
+        };
+
+        if (doTransfer == true) {
+            if (self.itemToAdd() == transferCard) {
+                self.resetAll();
+                computed = true;
+            } else {
+                self.transferAmount();
+                self.itemToAdd("");
+                $("#scan").focus();
+                computed = true;
+            };
+        } else {
+            dance_with_specials:
+            for (var i = 0; i < specials.length; i++) {
+                for (var j = 0; j < specials[i].cardsUids.length; j++) {
+                    if (specials[i].cardsUids[j] == self.itemToAdd()) {
+                        self.resetAll();
+                        self[specials[i].function](); //Yeah !
+                        computed = true;
+                        break dance_with_specials;
+                    };
+                };
+            };
+        };
+
+        if (!computed) {
+            self.getUser();
+        };
+    };
+
+    self.getUser = function() {
+        self.blockInput();
+        self.colorPg(111);
+        self.infoPg("Envoi/Réception...");
+        self.infoFunction('Rechargement');
+        userUid = self.itemToAdd();
+        $.post("<%= url_for get_user_by_card_path %>", {uid: userUid}, function(serverData) {
+            console.log(serverData);
+            if (serverData.status == "success") {
+                self.currentAmount(serverData.data.amount);
+                userId = serverData.data.id;
+                self.colorPg(111);
+                self.infoPg("Entrez le montant à créditer :");
+                self.infoReset("Carte #"+userUid+'<br>Montant nul pour annuler');
+                self.phase(-111);
+                $("#addedAmount").focus();
+            } else {
+                self.colorPg(-111);
+                self.infoPg(decodeURI(serverData.data));
+                self.itemToAdd("");
+            };
+        }).fail(function() {
+            alert('erreur lors du post AJAX! Recharge la page avant de continuer.');
+        }).always(function() {
+            self.blockInput();
+        });
+    };
+
+    self.placeOrder = function() {
+        self.colorPg(111);
+
+        if (Number(self.addedAmount()) == 0) {
+            self.resetAll();
+        } else if (Number(self.addedAmount()) > 1000) {
+            self.colorPg(-111);
+            self.infoPg('Montant maximun : 1000€');
+            self.addedAmount('');
+        } else {
+            self.blockInput();
+            self.infoPg("Envoi/Réception...");
+            var jsonData = {
+                'user_id': userId,
+                'addedAmount': self.addedAmount
+            };
+            $.post("<%= url_for save_checkout_path %>", jsonData, function(serverData) {
+                console.log(serverData);
+                if (serverData.status == "success") {
+                    lastOrderId = serverData.id;
+                    var d = new Date();
+                    var h = d.getHours();
+                    var m = d.getMinutes();
+                    var u = userUid;
+                    var a = Number(self.addedAmount()).toFixed(2);
+                    if (m.toString().length < 2) {
+                        m = "0" + m.toString();
+                    };
+                    self.orders.unshift(new addOrder(u, a, h + 'h' + m, serverData.id));
+                    if (self.orders().length > 5) {
+                        self.orders.pop();
+                    };
+                    self.resetAll();
+                } else {
+                    //Là il faut peut etre mettre un resetAll(), voir les test
+                    self.colorPg(-111);
+                    self.infoPg(decodeURI(serverData.data));
+                };
+            }).fail(function() {
+                alert('erreur lors du post AJAX! Recharge la page avant de continuer.');
+            }).always(function() {
+                self.blockInput();
+            });
+        };
+    }
+
+    self.cancelOrder = function() {
+        if (self.orders()[0].id == lastOrderId) {
+            checkCancel[1] = true;
+            if (checkCancel[0] == true) {
+                self.infoFunction('Annulation');
+                self.infoPg('Repassez la carte annulation pour confirmer');
+                checkCancel[0] = false;
+            } else {
+                checkCancel[0] = true;
+                self.infoPg('Annulation en cours...');
+                self.blockInput();
+                $.post("<%= url_for cancel_order_path %>", {order_id: lastOrderId}, function(serverData) {
+                    console.log(serverData);
+                    if (serverData.status == "success") {
+                        lastOrderId = -1;
+                        self.resetAll();
+                        self.infoFunction('Annulation réussie !');
+                        self.orders.shift();
+                    } else {
+                        //Là il faut peut etre mettre un resetAll(), voir les test
+                        self.colorPg(-111);
+                        self.infoPg(decodeURI(serverData.data));
+                    };
+                }).fail(function() {
+                    alert('erreur lors du post AJAX! Recharge la page avant de continuer.');
+                }).always(function() {
+                    self.blockInput();
+                });
+            };
+        } else {
+            self.colorPg(-111);
+            self.infoPg("Seule la dernière commande peut être annulée");
+        };
+    };
+
+    self.transferAmount = function() {
+        self.infoFunction('Vider une carte dans une autre');
+        self.infoReset("Repassez la carte 'Transfert' pour annuler");
+        
+        if (doTransfer == false) {
+            self.infoPg("Scanne d'abord la carte client à vider");
+            transferCard = lastItem;
+            doTransfer = true;
+        } else if (doTransfer == true && transfertUids[0] == null) {
+            transfertUids[0] = lastItem;
+            self.infoPg("Scanne maintenant la carte client à remplir");
+        } else if (doTransfer == true && transfertUids[0] != null) {
+            transfertUids[1] = lastItem;
+            self.blockInput();
+            $.post("<%= url_for transfer_path %>", {uid1: transfertUids[0], uid2: transfertUids[1]}, function(serverData) {
+                console.log(serverData);
+                self.resetAll();
+                if (serverData.status == "success") {
+                    self.infoFunction('Transfert réussi !');
+                    self.infoPg("Nouveau montant de la 2ème carte: "+serverData.amount+'€');
+                } else {
+                    self.colorPg(-111);
+                    self.infoFunction('Transfert échoué');
+                    self.infoPg(decodeURI(serverData.data));
+                };
+            }).fail(function() {
+                alert('erreur lors du post AJAX! Recharge la page avant de continuer.');
+            }).always(function() {
+                self.blockInput();
+            });
+        };
+    };
+
+    self.blockInput = function() {
+        $('#scan').toggle();
+        $('#addedAmount').toggle();
+        if ($('#scan').is(":visible")) {
+            $('#scan').focus();
+        };
+        if ($('#addedAmount').is(":visible")) {
+            $('#addedAmount').focus();
+        };
+    };
+
+    self.hideNavbar = function() {
+        if ($('#navbar').is(':hidden')) {
+            $('#navbar').show();
+            $('#post-navbar').removeClass('post-navbar');
+        } else {
+            $('#navbar').hide();
+            $('#post-navbar').addClass('post-navbar');
+        };
+    };
+
+    self.reloadWindow = function() {
+        location.reload(true);
+    };
+
+    self.resetAll = function() {
+        self.itemToAdd("");
+        self.infoPg("Scanne une carte :");
+        self.infoFunction("");
+        self.infoReset("");
+        self.colorPg(111);
+        self.phase(111);
+        self.addedAmount("");
+        self.currentAmount("");
+        userId        = null;
+        userUid       = null;
+        doTransfer    = false;
+        transferCard  = null;
+        transfertUids = [null, null];
+        $("#scan").focus();
+    };
+
+    //http://www.javascriptkit.com/domref/nodetype.shtml pour infos sur le nodetype
+    self.showOrder = function(elem) {
+        if (elem.nodeType === 1) $(elem).hide().css('opacity', 0).slideDown('slow').animate({
+            opacity: 1
+        }, {
+            queue: false,
+            duration: 1200
+        });
+    };
+
+    $(document).keypress(function(e) {
+    if(e.which == 32) {
+        e.preventDefault();
+        sdtswitch();
+    }
+});
+
+
+function sdtswitch() {
+        self.resetAll();
+    if ($("#entree").hasClass('sdt-active')) {
+    } else{
+        $("#trads").focus();
+    };
+        $("#trads").val("");
+        $("#entreetxt").html("Scanne une carte");
+        $("#entree").toggleClass('sdt-active');
+        $("#sortie").toggleClass('sdt-active');
+}
+
+
+    self.checkoutTrads = function () {
+
+        var jsonData = {
+                'uid': $("#trads").val(),
+            };
+        $.post("<%= url_for save_checkout_sdt_path %>", jsonData, function(serverData) {
+            console.log(serverData);
+            if (serverData.status == "success") {
+                lastOrderId = serverData.id;
+                var d = new Date();
+                var h = d.getHours();
+                var m = d.getMinutes();
+                var u = $("#trads").val();
+                var a = -Number(serverData.data).toFixed(2);
+                if (m.toString().length < 2) {
+                    m = "0" + m.toString();
+                };
+                self.orders.unshift(new addOrder(u, a, h + 'h' + m, serverData.id));
+                if (self.orders().length > 5) {
+                    self.orders.pop();
+                };
+                $("#entreetxt").html("Donne <span class='tickss'>" + serverData.data +"</span> en tick'ss");
+            } else {
+                //Là il faut peut etre mettre un resetAll(), voir les test
+                $("#entreetxt").html(serverData.data);
+            };
+        }).fail(function() {
+            alert('erreur lors du post AJAX! Recharge la page avant de continuer.');
+        }).always(function() {
+            $("#trads").val("");
+            $("#trads").focus();
+        });
+
+    }
+};
+
+ko.applyBindings(new CheckoutViewModel);
+</script>

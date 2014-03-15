@@ -1,0 +1,155 @@
+<div class="container">
+    
+    <h1>
+        Produits du point de vente <%= @shop.name %><br>
+        <small><%= @shop.description%></small>
+    </h1><br>
+    <div class="row">
+        <div class="col-md-2"></div>
+        <div class="col-md-4">
+            <h3>Au Bar <small data-bind='text: productShop().length'></small></h3>
+
+            <table data-bind='visible: productShop().length > 0' class="table table-condensed">
+                <thead>
+                    <tr>
+                        <th width="80%">Produit</th>
+                        <th width="10%">Prix</th>
+                        <th />
+                    </tr>
+                </thead>
+                <tbody data-bind='foreach: productShop'>
+                    <tr >
+                        <td>
+                            <span data-bind='text: name'></span>
+                            <div data-bind="attr: { id: id }" class="pull-right">
+                                <%= image_tag("preloader.gif", :width => 60) %>
+                            </div>
+                        </td>
+                        <td><span data-bind='text: price'></span></td>
+                        <td><a href="#" data-bind="click: $root.removeProduct" class="glyphicon glyphicon-arrow-right"></a></td>
+                    </tr>
+                </tbody>
+            </table>
+
+        </div>
+    
+        <div class='col-md-4'>
+
+            <h3>Non disponibles <small data-bind='text: productAll().length'></small></h3>
+            <table data-bind='visible: productAll().length > 0' class="table table-condensed">
+                <thead>
+                    <tr>
+                        <th width='80%'>Produit</th>
+                        <th width='10%'>Prix</th>
+                        <th />
+                    </tr>
+                </thead>
+                <tbody data-bind='foreach: productAll'>
+                <tr >
+                        <td>
+                            <span data-bind='text: name'></span>
+                            <div data-bind='attr: { id: id }' class='pull-right'>
+                                <%= image_tag("preloader.gif", :width => 60) %>
+                            </div>
+                        </td>
+                        <td><span data-bind='text: price'></span></td>
+                        <td><a href='#' data-bind='click: $root.addProduct' class="glyphicon glyphicon-arrow-left"></a></td>
+                    </tr>
+                </tbody>
+            </table>
+
+        </div>
+    </div>
+</div>
+
+</div>
+
+
+<script>
+
+function addReservation(id, name, price) {
+    var self   = this;
+    self.id    = id;
+    self.name  = name;
+    self.price = price;
+}
+
+function ReservationsViewModel() {
+    var self = this;
+
+    self.productShop = ko.observableArray([ 
+        <% @shop.products.each do |product | %> 
+        <%= raw 'new addReservation(' + product.id.to_s + ',"' + product.name + '",' + product.price.to_s + '),' %> 
+        <% end %>
+    //new addReservation(id, name, price),
+    ]);
+
+    self.productAll = ko.observableArray([ 
+        <% @products.each do |product| %> 
+        <%= raw 'new addReservation(' + product.id.to_s + ',"' + product.name + '",' + product.price.to_s + '),' %> 
+        <% end %>
+    //new addReservation(id, name, price),
+    ]);
+
+
+    self.Doublons = function() {
+
+        for (var i = 0; i < self.productShop().length; i++) {
+            for (var j = 0; j < self.productAll().length; j++) {
+                if (self.productShop()[i].name == self.productAll()[j].name) {
+                    self.productAll.remove(self.productAll()[j]);
+                    break;
+                };
+            };
+        };
+    };
+    self.Doublons();
+
+    self.addProduct = function(productAll) {
+
+        $('#' + productAll.id).show();
+        self.productAll.remove(productAll);
+        self.productShop.push(new addReservation(productAll.id, productAll.name, productAll.price));
+
+        $.post('<%= view_products_path(@shop) + "/add/" %>' + productAll.id, {}, function(allData) {
+            if (allData.status == "success") {
+                $('#' + productAll.id).hide();
+            } else {
+                self.productShop.remove(productAll);
+                self.productAll.push(new addReservation(productAll.id, productAll.name, productAll.price));
+            };
+
+        }).error(function() {
+            alert('erreur lors du post AJAX! Recharge la page avant de continuer.');
+        });
+    };
+
+    self.removeProduct = function(productShop) {
+
+        $('#' + productShop.id).show();
+        self.productShop.remove(productShop);
+        self.productAll.push(new addReservation(productShop.id, productShop.name, productShop.price));
+
+        $.post('<%= view_products_path(@shop) + "/remove/" %>' + productShop.id, {}, function(allData) {
+
+            if (allData.status == "success") {
+                $('#' + productShop.id).hide();
+            } else {
+                self.productShop.push(new addReservation(productShop.id, productShop.name, productShop.price));
+            };
+
+        }).error(function() {
+            alert('erreur lors du post AJAX! Recharge la page avant de continuer.');
+        });
+    };
+
+};
+
+ko.applyBindings(new ReservationsViewModel());
+
+<% @products.each do |product | %> 
+<%= raw "$('#" + product.id.to_s + "').hide();" %> 
+<% end %>
+
+</script>
+
