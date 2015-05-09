@@ -1,24 +1,20 @@
-<p>
-	Pour toute information<br>
-	For any information<br>
-	<br>
-	contact : <br>
-	David Hérault<br>
-	dherault at gmail dot com<br>
-	Social : /dherault<br>
-	<br>
-	Elève-ingénieur/Engineering student<br>
-	à/at :<br>
-	<br>
-	Ecole Nationale Supérieure des Arts et Métiers (ENSAM)<br>
-	CER d'Aix-en-Provence<br>
-	<br>
-	<br>
-	<b>MIT LICENCE, Auteur/Author : David Louis Octave Hérault Thébault</b><br><br>
-	<u>Français :</u><br>
-	La licence donne à toute personne recevant le logiciel le droit illimité de l'utiliser, le copier, le modifier, le fusionner, le publier, le distribuer, le vendre et de changer sa licence. La seule obligation est de mettre le nom des auteurs avec la notice de copyright ci dessous.<br><br>
-	<u>English :</u><br>
-	Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:<br><br>
-	<u>NOTICE :</u><br>
-	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-</p>
+INESS handles NFC cashless payments in events.
+
+Stack : Rails 4, knockout.js & jQuery
+
+(feu) INESS, formerly known as Zscan is suppose to work with NFC cards or wristbands and in-house hardware for order processing (a pi with a nfc reader and a touch screen).
+
+Functionnalities : 
+- Card refil and bar checkout
+- Endpoints and Products administration
+- Remote stock administration
+- integrated chat between bars, cashiers and the event manager.
+- Accessible data, Built-in stastistics (not live, needs page reloading), XML exports
+
+It has been used in production once (6 hours running, 600+ orders, 6 bars and one cashier, 5k euros turnover), no problem arose.
+
+It is also my first app, before that all I would do was static web pages. I started it in PHP but rebuilt it in Ruby.
+
+MIT License.
+
+
