@@ -1,19 +1,20 @@
-INESS handles NFC cashless payments in events.
+NFC cashless payments for events.
 
 Stack : Rails 4, knockout.js & jQuery
 
-(feu) INESS, formerly known as Zscan is suppose to work with NFC cards or wristbands and in-house hardware for order processing (a pi with a nfc reader and a touch screen).
+(feu) INESS, formerly known as Zscan is supposed to work with NFC cards or wristbands and in-house hardware for order processing (a rpi with a nfc reader and a touch screen).
 
-Functionnalities : 
-- Card refil and bar checkout
+Functionalities : 
+- Card refils and bar checkouts
 - Endpoints and Products administration
-- Remote stock administration
+- Remote stocks administration
 - integrated chat between bars, cashiers and the event manager.
 - Accessible data, Built-in stastistics (not live, needs page reloading), XML exports
 
 It has been used in production once (6 hours running, 600+ orders, 6 bars and one cashier, 5k euros turnover), no problem arose.
+Then I dropped the project u_u'.
 
-It is also my first app, before that all I would do was static web pages. I started it in PHP but rebuilt it in Ruby.
+It is also my first app, before that all I would do was static web pages :). I started it in PHP but rebuilt it in Ruby.
 
 MIT License.
 
